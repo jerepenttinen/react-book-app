@@ -1,0 +1,14 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "rules": {
+    "@typescript-eslint/consistent-type-imports": "warn",
+    "quotes": ["error", "double", "avoid-escape"],
+    "jsx-quotes": ["error", "prefer-double"],
+    "semi": ["error", "always"]
+  }
+}
