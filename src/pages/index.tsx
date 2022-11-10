@@ -1,11 +1,10 @@
 import { type NextPage } from "next";
 
 const Home: NextPage = () => {
-
   return (
     <>
       <main>
-        <p className="text-2xl text-primary">Hello!</p>
+        <p className="text-2xl">Hello!</p>
       </main>
     </>
   );
