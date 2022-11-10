@@ -4,5 +4,9 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require("daisyui")],
+  plugins: [
+    require("daisyui"),
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require("@headlessui/tailwindcss")({ prefix: "ui" }),
+  ],
 };
