@@ -2,9 +2,23 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
 import { IoSearchOutline } from "react-icons/io5";
+import useDebounce from "~/hooks/useDebounce";
+import { trpc } from "~/utils/trpc";
 
 function Searchbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+
+  const { data: booksData } = trpc.books.search.useQuery(
+    {
+      term: debouncedSearch,
+    },
+    {
+      // Don't run with empty search!
+      enabled: !!debouncedSearch,
+    },
+  );
 
   return (
     <>
@@ -29,6 +43,7 @@ function Searchbar() {
                 type="text"
                 placeholder="Etsi kirjoja"
                 className="input-bordered input w-full rounded-full pl-14"
+                onChange={(e) => setSearch(e.target.value)}
                 autoFocus
               />
               <IoSearchOutline
@@ -37,6 +52,11 @@ function Searchbar() {
               />
             </div>
           </Dialog.Title>
+          <div>
+            {booksData?.items.map((b, i) => (
+              <p key={i}>{b.volumeInfo.title}</p>
+            ))}
+          </div>
         </Dialog.Panel>
       </Dialog>
     </>
