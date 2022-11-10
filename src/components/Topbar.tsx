@@ -45,7 +45,7 @@ function Searchbar() {
 
 function Topbar() {
   return (
-    <div className="flex h-16 w-full flex-row items-center justify-between gap-5 bg-base-300 py-2 px-5">
+    <div className="sticky top-0 z-10 flex h-16 items-center justify-between gap-5 bg-base-300 bg-opacity-50 py-2 px-5 backdrop-blur">
       <Searchbar />
 
       {/* <Avatar src="/pfp.png" alt="Profile picture" size="s" /> */}

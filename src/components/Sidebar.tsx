@@ -25,13 +25,28 @@ function IconLink(props: IconLinkProps) {
 
 function Sidebar() {
   return (
-    <div className="flex h-full w-72 flex-col gap-8 bg-base-300 px-6 py-8">
-      <IconLink href="/" icon={<IoHomeOutline />} text="Koti" />
-      <IconLink href="/" icon={<IoLibraryOutline />} text="Kirjasto" />
-      <IconLink href="/" icon={<IoPeopleOutline />} text="Kaverit" />
-      <IconLink href="/" icon={<IoNotificationsOutline />} text="Ilmoitukset" />
-      <div className="divider my-0 h-0"></div>
-      <p className="text-lg font-bold">Parhaillaan lukemassa</p>
+    <div className="drawer-side">
+      <ul className="menu w-72 bg-base-300">
+        <li>
+          <IconLink href="/" icon={<IoHomeOutline />} text="Koti" />
+        </li>
+        <li>
+          <IconLink href="/" icon={<IoLibraryOutline />} text="Kirjasto" />
+        </li>
+        <li>
+          <IconLink href="/" icon={<IoPeopleOutline />} text="Kaverit" />
+        </li>
+        <li>
+          <IconLink
+            href="/"
+            icon={<IoNotificationsOutline />}
+            text="Ilmoitukset"
+          />
+        </li>
+        <li className="menu-title">
+          <span>Parhaillaan lukemassa</span>
+        </li>
+      </ul>
       {/* Kirjoja */}
     </div>
   );
