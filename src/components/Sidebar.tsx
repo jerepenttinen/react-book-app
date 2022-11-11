@@ -14,7 +14,7 @@ interface IconLinkProps {
 function IconLink(props: IconLinkProps) {
   return (
     <Link
-      className="inline-flex items-baseline justify-start gap-2 text-lg font-bold"
+      className="inline-flex items-baseline justify-start gap-2 py-4 text-lg font-bold"
       href={props.href}
     >
       {props.icon}
