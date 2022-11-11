@@ -8,7 +8,7 @@ export interface BookData {
   volumeInfo: {
     title: string;
     subtitle: string;
-    authors: string[];
+    authors?: string[];
     publisher: string;
     publishedDate: string;
     description: string;
@@ -19,10 +19,10 @@ export interface BookData {
     pageCount: number;
     // printType: string;
     categories: string[];
-    // averageRating: number;
+    averageRating: number;
     // ratingscount: number;
     // contentVersion: string;
-    imageLinks: {
+    imageLinks?: {
       smallThumbnail: string;
       thumbnail: string;
     };

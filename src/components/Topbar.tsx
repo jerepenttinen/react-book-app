@@ -1,6 +1,7 @@
 // import Avatar from "./Avatar";
 import { Dialog } from "@headlessui/react";
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import useDebounce from "~/hooks/useDebounce";
 import { trpc } from "~/utils/trpc";
@@ -19,6 +20,16 @@ function Searchbar() {
       enabled: !!debouncedSearch,
     },
   );
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSearch("");
+    }
+  }, [isOpen]);
+
+  const urlParams = new URLSearchParams();
+  urlParams.append("q", debouncedSearch);
+  const searchUrl = "/search?" + urlParams.toString();
 
   return (
     <>
@@ -56,6 +67,13 @@ function Searchbar() {
             {booksData?.items.map((b, i) => (
               <p key={i}>{b.volumeInfo.title}</p>
             ))}
+          </div>
+          <div>
+            {booksData && (
+              <Link href={searchUrl} onClick={() => setIsOpen(false)}>
+                Näytä kaikki tulokset
+              </Link>
+            )}
           </div>
         </Dialog.Panel>
       </Dialog>

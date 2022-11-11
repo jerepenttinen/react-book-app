@@ -13,5 +13,19 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/u/**",
+      },
+      {
+        protocol: "http",
+        hostname: "books.google.com",
+        pathname: "/books/content",
+      },
+    ],
+  },
 };
 export default config;
