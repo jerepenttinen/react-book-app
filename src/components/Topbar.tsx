@@ -1,6 +1,7 @@
 // import Avatar from "./Avatar";
 import { Dialog } from "@headlessui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import useDebounce from "~/hooks/useDebounce";
@@ -11,6 +12,7 @@ function Searchbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const router = useRouter();
 
   const { data: booksData } = trpc.books.search.useQuery(
     {
@@ -27,6 +29,10 @@ function Searchbar() {
       setSearch("");
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [router.asPath]);
 
   const urlParams = new URLSearchParams();
   urlParams.append("q", debouncedSearch);
@@ -72,11 +78,7 @@ function Searchbar() {
             </div>
           )}
           <div className="prose text-center">
-            {booksData && (
-              <Link href={searchUrl} onClick={() => setIsOpen(false)}>
-                Näytä kaikki tulokset
-              </Link>
-            )}
+            {booksData && <Link href={searchUrl}>Näytä kaikki tulokset</Link>}
           </div>
         </Dialog.Panel>
       </Dialog>
