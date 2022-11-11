@@ -7,7 +7,7 @@ export interface BookData {
   id: string;
   volumeInfo: {
     title: string;
-    subtitle: string;
+    subtitle?: string;
     authors?: string[];
     publisher: string;
     publishedDate: string;
@@ -23,8 +23,8 @@ export interface BookData {
     // ratingscount: number;
     // contentVersion: string;
     imageLinks?: {
-      smallThumbnail: string;
       thumbnail: string;
+      small?: string;
     };
     language: string;
     // previewLink: string;
@@ -49,4 +49,16 @@ export async function fetchBooks(url: string): Promise<BooksData> {
     const error = new Error("unknown");
     return Promise.reject(error);
   }
+}
+
+export async function fetchBook(url: string): Promise<BookData> {
+  const response = await fetch(url);
+
+  const book: BookData = await response.json();
+
+  if (response.ok && book) {
+    return book;
+  }
+
+  return Promise.reject(new Error("Unknown"));
 }

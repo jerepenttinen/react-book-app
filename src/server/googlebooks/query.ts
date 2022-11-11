@@ -1,11 +1,13 @@
 import { URL } from "url";
 import { env } from "~/env/server.mjs";
 
+// TODO: Make not BAD!
 export class BooksQuery {
   url: URL;
+  baseUrl = "https://www.googleapis.com/books/v1/volumes";
 
   constructor() {
-    this.url = new URL("https://www.googleapis.com/books/v1/volumes");
+    this.url = new URL(this.baseUrl);
 
     // Remove magazines from search results
     // https://developers.google.com/books/docs/v1/using#print-type
@@ -23,6 +25,10 @@ export class BooksQuery {
     this.url.searchParams.append("startIndex", pageIndex.toString());
     this.url.searchParams.append("maxResults", pageLength.toString());
     return this;
+  }
+
+  id(id: string) {
+    return this.baseUrl + "/" + id;
   }
 
   build() {
