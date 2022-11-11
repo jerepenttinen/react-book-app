@@ -72,8 +72,8 @@ function Searchbar() {
           </Dialog.Title>
           {booksData && (
             <div className="my-6 flex flex-col gap-4">
-              {booksData.items.map((b) => (
-                <SearchResult key={b.id} book={b} compact />
+              {booksData.items?.map((b) => (
+                <SearchResult key={"topbar" + b.id} book={b} compact />
               ))}
             </div>
           )}

@@ -30,8 +30,8 @@ const SearchPage: NextPage = () => {
     <>
       <h1>Hakutulokset: {q}</h1>
       <div className="flex flex-col gap-4">
-        {booksData?.items.map((b) => (
-          <SearchResult key={b.id} book={b} />
+        {booksData?.items?.map((b) => (
+          <SearchResult key={"search" + b.id} book={b} />
         ))}
       </div>
     </>
