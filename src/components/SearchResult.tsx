@@ -46,7 +46,7 @@ function SearchResult({ book, compact }: SearchResultProps) {
         )}
       </Link>
 
-      <div className="prose flex w-3/4 flex-col">
+      <div className="prose flex w-4/5 flex-col">
         <Link
           href={`/books/${book.id}`}
           className={`${
