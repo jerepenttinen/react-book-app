@@ -9,12 +9,18 @@ const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
 
-  const { data: bookData, isLoading } = trpc.books.getById.useQuery(
+  const {
+    data: bookData,
+    isLoading,
+    isError,
+    error,
+  } = trpc.books.getById.useQuery(
     {
       id: bookId as string,
     },
     {
       enabled: !!bookId,
+      retry: 0,
     },
   );
 
@@ -26,6 +32,10 @@ const BookPage: NextPage = () => {
     return <></>;
   }
 
+  if (isError) {
+    return <>{error.message}</>;
+  }
+
   if (isLoading) {
     return <>Ladataan...</>;
   }
@@ -35,17 +45,19 @@ const BookPage: NextPage = () => {
   }
 
   const volume = bookData.volumeInfo;
+  console.log(volume.imageLinks);
 
   return (
     <>
       <h1>{volume.title}</h1>
-      {volume.imageLinks && volume.imageLinks.small ? (
+      {volume.imageLinks && volume.imageLinks.thumbnail ? (
         <Image
-          src={volume.imageLinks.small}
+          src={volume.imageLinks.thumbnail}
           alt={`Kirjan ${volume.title} kansikuva`}
-          width={150}
+          width={128}
           height={300}
           className="my-0 h-auto rounded"
+          priority
         />
       ) : (
         <div className="flex h-full w-full justify-center rounded bg-neutral">

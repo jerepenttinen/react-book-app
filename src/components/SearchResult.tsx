@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { type BookData } from "~/server/googlebooks/fetchBooks";
 import { ImFileEmpty } from "react-icons/im";
+import { type BookData } from "~/server/googlebooks/book-types";
 
 function formatTitle(book: BookData) {
   let title = "";
