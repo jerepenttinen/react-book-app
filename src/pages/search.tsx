@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "~/utils/trpc";
-import Image from "next/image";
+import SearchResult from "~/components/SearchResult";
 
 const SearchPage: NextPage = () => {
   const router = useRouter();
@@ -23,7 +23,7 @@ const SearchPage: NextPage = () => {
   }
 
   if (isLoading) {
-    return <h1>Loading...</h1>;
+    return <h1>Ladataan...</h1>;
   }
 
   return (
@@ -31,25 +31,7 @@ const SearchPage: NextPage = () => {
       <h1>Hakutulokset: {q}</h1>
       <div className="flex flex-col gap-4">
         {booksData?.items.map((b) => (
-          <div key={b.id} className="flex flex-row gap-4">
-            {b.volumeInfo.imageLinks ? (
-              <Image
-                src={b.volumeInfo.imageLinks.thumbnail}
-                alt={`Kirjan ${b.volumeInfo.title} kansikuva`}
-                height={96}
-                width={62}
-                className="my-0 w-auto"
-              />
-            ) : (
-              <div>empty</div>
-            )}
-            <div className="flex flex-col">
-              <b>{b.volumeInfo.title}</b>
-              <p>
-                {b.volumeInfo.authors?.join(", ") ?? "Tuntematon kirjoittaja"}
-              </p>
-            </div>
-          </div>
+          <SearchResult key={b.id} book={b} />
         ))}
       </div>
     </>

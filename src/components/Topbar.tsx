@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import useDebounce from "~/hooks/useDebounce";
 import { trpc } from "~/utils/trpc";
+import SearchResult from "./SearchResult";
 
 function Searchbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,12 +64,14 @@ function Searchbar() {
               />
             </div>
           </Dialog.Title>
-          <div>
-            {booksData?.items.map((b, i) => (
-              <p key={i}>{b.volumeInfo.title}</p>
-            ))}
-          </div>
-          <div>
+          {booksData && (
+            <div className="my-6 flex flex-col gap-4">
+              {booksData.items.map((b) => (
+                <SearchResult key={b.id} book={b} compact />
+              ))}
+            </div>
+          )}
+          <div className="prose text-center">
             {booksData && (
               <Link href={searchUrl} onClick={() => setIsOpen(false)}>
                 Näytä kaikki tulokset
