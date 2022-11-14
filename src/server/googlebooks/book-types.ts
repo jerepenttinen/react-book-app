@@ -11,24 +11,18 @@ export interface BookData {
     authors?: string[];
     publisher: string;
     publishedDate: string;
-    description: string;
+    description?: string;
     industryIdentifiers: {
       type: string;
       identifier: string;
     }[];
-    pageCount: number;
-    // printType: string;
+    pageCount?: number;
     categories: string[];
     averageRating: number;
-    // ratingscount: number;
-    // contentVersion: string;
     imageLinks?: {
       thumbnail: string;
       small?: string;
     };
     language: string;
-    // previewLink: string;
-    // infoLink: string;
-    // canonicalVolumeLink: string;
   };
 }

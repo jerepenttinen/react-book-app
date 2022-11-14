@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ImFileEmpty } from "react-icons/im";
 import { type BookData } from "~/server/googlebooks/book-types";
 
-function formatTitle(book: BookData) {
+export function formatTitle(book: BookData) {
   let title = "";
   if (book.volumeInfo.title) {
     title += book.volumeInfo.title;
