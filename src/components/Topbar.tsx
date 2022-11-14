@@ -1,5 +1,5 @@
 import Avatar from "./Avatar";
-import { Dialog } from "@headlessui/react";
+import { Dialog, Menu } from "@headlessui/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -94,7 +94,39 @@ function Topbar() {
       <Searchbar />
 
       {session.data ? (
-        <Avatar user={session.data.user} size="s" />
+        <div className="dropdown dropdown-end">
+          <Menu>
+            <Menu.Button>
+              <Avatar user={session.data.user} size="s" />
+            </Menu.Button>
+            <Menu.Items className="dropdown-content menu rounded-box w-52 border border-base-content border-opacity-25 bg-base-100 p-2 shadow-xl">
+              <Menu.Item as="li">
+                {({ active }) => (
+                  <Link
+                    className={`${
+                      active && "bg-primary-focus text-primary-content"
+                    }`}
+                    href="/"
+                  >
+                    Profiili
+                  </Link>
+                )}
+              </Menu.Item>
+              <Menu.Item as="li">
+                {({ active }) => (
+                  <Link
+                    className={`${
+                      active && "bg-primary-focus text-primary-content"
+                    }`}
+                    href="/api/auth/signout"
+                  >
+                    Kirjaudu ulos
+                  </Link>
+                )}
+              </Menu.Item>
+            </Menu.Items>
+          </Menu>
+        </div>
       ) : (
         <Link href="/api/auth/signin" className="btn">
           Kirjaudu
