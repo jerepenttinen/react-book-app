@@ -100,30 +100,33 @@ function Topbar() {
               <Avatar user={session.data.user} size="s" />
             </Menu.Button>
             <Menu.Items className="dropdown-content menu rounded-box w-52 border border-base-content border-opacity-25 bg-base-100 p-2 shadow-xl">
-              <Menu.Item as="li">
-                {({ active }) => (
-                  <Link
-                    className={`${
-                      active && "bg-primary-focus text-primary-content"
-                    }`}
-                    href="/"
-                  >
-                    Profiili
-                  </Link>
-                )}
-              </Menu.Item>
-              <Menu.Item as="li">
-                {({ active }) => (
-                  <Link
-                    className={`${
-                      active && "bg-primary-focus text-primary-content"
-                    }`}
-                    href="/api/auth/signout"
-                  >
-                    Kirjaudu ulos
-                  </Link>
-                )}
-              </Menu.Item>
+              <Link href="#" passHref>
+                <Menu.Item as="li">
+                  {({ active }) => (
+                    <a
+                      className={`${
+                        active && "bg-primary-focus text-primary-content"
+                      }`}
+                    >
+                      Profiili
+                    </a>
+                  )}
+                </Menu.Item>
+              </Link>
+
+              <Link href="/api/auth/signout" passHref>
+                <Menu.Item as="li">
+                  {({ active }) => (
+                    <a
+                      className={`${
+                        active && "bg-primary-focus text-primary-content"
+                      }`}
+                    >
+                      Kirjaudu ulos
+                    </a>
+                  )}
+                </Menu.Item>
+              </Link>
             </Menu.Items>
           </Menu>
         </div>
