@@ -7,7 +7,7 @@ interface AvatarProps {
 }
 
 const sizes = {
-  s: 40,
+  s: 48,
   m: 64,
   l: 256,
 };

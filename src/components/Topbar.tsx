@@ -94,7 +94,7 @@ function Topbar() {
       <Searchbar />
 
       {session.data ? (
-        <div className="dropdown dropdown-end">
+        <div className="dropdown dropdown-end h-12">
           <Menu>
             <Menu.Button>
               <Avatar user={session.data.user} size="s" />
