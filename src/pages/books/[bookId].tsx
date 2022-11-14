@@ -6,6 +6,8 @@ import Image from "next/image";
 import { ImFileEmpty } from "react-icons/im";
 import { formatTitle } from "~/components/SearchResult";
 
+import parse from "html-react-parser";
+
 const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
@@ -75,59 +77,58 @@ const BookPage: NextPage = () => {
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-green-500"
+                className="mask mask-half-1 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-green-500"
+                className="mask mask-half-2 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-green-500"
-                checked
+                className="mask mask-half-1 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-green-500"
+                className="mask mask-half-2 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-green-500"
+                className="mask mask-half-1 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-green-500"
+                className="mask mask-half-2 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-green-500"
+                className="mask mask-half-1 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-green-500"
+                className="mask mask-half-2 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-green-500"
+                className="mask mask-half-1 mask-star-2 bg-secondary"
               />
               <input
                 type="radio"
                 name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-green-500"
+                className="mask mask-half-2 mask-star-2 bg-secondary"
               />
             </div>
 
             <h1 className="my-0">5.00</h1>
           </div>
-          {volume.description && <span>{volume.description}</span>}
+          {volume.description && <div>{parse(volume.description)}</div>}
           <div className="divider my-0"></div>
           <div className="ga-2 flex flex-col">
             {volume.pageCount && <span>{volume.pageCount} sivua</span>}
@@ -135,7 +136,7 @@ const BookPage: NextPage = () => {
             <span>Kustantaja {volume.publisher}</span>
             {
               // TODO: Paremman näkösesti tulostus esim. ISBN 9522918253 (ISBN13 9789522918253)
-              volume.industryIdentifiers.map((identifier, i) => (
+              volume.industryIdentifiers?.map((identifier, i) => (
                 <span key={"isbn" + i}>
                   {identifier.type} {identifier.identifier}
                 </span>

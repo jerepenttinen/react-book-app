@@ -12,7 +12,7 @@ export interface BookData {
     publisher: string;
     publishedDate: string;
     description?: string;
-    industryIdentifiers: {
+    industryIdentifiers?: {
       type: string;
       identifier: string;
     }[];
