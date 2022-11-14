@@ -1,5 +1,6 @@
-// import Avatar from "./Avatar";
+import Avatar from "./Avatar";
 import { Dialog } from "@headlessui/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
@@ -87,16 +88,18 @@ function Searchbar() {
 }
 
 function Topbar() {
+  const session = useSession();
   return (
     <div className="sticky top-0 z-10 flex h-16 items-center justify-between gap-5 bg-base-300 bg-opacity-50 py-2 px-5 backdrop-blur">
       <Searchbar />
 
-      {/* <Avatar src="/pfp.png" alt="Profile picture" size="s" /> */}
-      <div className="placeholder avatar">
-        <div className="w-12 rounded-full bg-primary text-primary-content">
-          JP
-        </div>
-      </div>
+      {session.data ? (
+        <Avatar user={session.data.user} size="s" />
+      ) : (
+        <Link href="/api/auth/signin" className="btn">
+          Kirjaudu
+        </Link>
+      )}
     </div>
   );
 }
