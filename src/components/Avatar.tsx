@@ -19,17 +19,18 @@ function Avatar(props: AvatarProps) {
   }
 
   return (
-    <div className={`avatar ${props.user.image || "placeholder"}`}>
+    <div className={`avatar ${!props.user.image && "placeholder"}`}>
       <div
         className={`rounded-full w-[${size}px] h-[${size}px] bg-primary text-primary-content`}
       >
         {props.user.image ? (
           <Image
-            src={props.user?.image}
+            src={props.user.image}
             alt="Avatar"
             width={size}
             height={size}
-            className="object-contain"
+            className="my-0 object-contain"
+            priority
           />
         ) : (
           <span>{props.user.name ?? "?"}</span>

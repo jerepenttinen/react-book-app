@@ -100,7 +100,7 @@ function Topbar() {
               <Avatar user={session.data.user} size="s" />
             </Menu.Button>
             <Menu.Items className="dropdown-content menu rounded-box w-52 border border-base-content border-opacity-25 bg-base-100 p-2 shadow-xl">
-              <Link href="#" passHref>
+              <Link href={`/users/${session.data.user?.id}`} passHref>
                 <Menu.Item as="li">
                   {({ active }) => (
                     <a
