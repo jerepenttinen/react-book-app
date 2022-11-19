@@ -134,7 +134,7 @@ const BookPage: NextPage = () => {
                 type="checkbox"
                 className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
               />
-              <div className="cut-text order-1 peer-checked/more:contents">
+              <div className="order-1 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents">
                 {parse(volume.description)}
               </div>
             </div>
