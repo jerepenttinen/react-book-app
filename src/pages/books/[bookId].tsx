@@ -128,7 +128,17 @@ const BookPage: NextPage = () => {
 
             <h1 className="my-0">5.00</h1>
           </div>
-          {volume.description && <div>{parse(volume.description)}</div>}
+          {volume.description && (
+            <div className="flex flex-col">
+              <input
+                type="checkbox"
+                className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
+              />
+              <div className="cut-text order-1 peer-checked/more:contents">
+                {parse(volume.description)}
+              </div>
+            </div>
+          )}
           <div className="divider my-0"></div>
           <div className="ga-2 flex flex-col">
             {volume.pageCount && <span>{volume.pageCount} sivua</span>}
