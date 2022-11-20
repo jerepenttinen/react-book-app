@@ -1,25 +1,34 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useState } from "react";
 import {
   IoHomeOutline,
+  IoHome,
   IoLibraryOutline,
+  IoLibrary,
   IoPeopleOutline,
+  IoPeople,
   IoNotificationsOutline,
+  IoNotifications,
 } from "react-icons/io5";
 import { trpc } from "~/utils/trpc";
 
 interface IconLinkProps {
   href: string;
   icon: JSX.Element;
+  hoverIcon: JSX.Element;
   text: string;
 }
 function IconLink(props: IconLinkProps) {
+  const [isHovering, setIsHovering] = useState(false);
   return (
     <Link
       className="inline-flex items-baseline justify-start gap-2 py-4 text-lg font-bold"
       href={props.href}
+      onMouseOver={() => setIsHovering(true)}
+      onMouseOut={() => setIsHovering(false)}
     >
-      {props.icon}
+      {isHovering ? props.hoverIcon : props.icon}
       {props.text}
     </Link>
   );
@@ -39,18 +48,34 @@ function Sidebar() {
     <div className="drawer-side">
       <ul className="menu w-72 bg-base-300">
         <li>
-          <IconLink href="/" icon={<IoHomeOutline />} text="Koti" />
+          <IconLink
+            href="/"
+            icon={<IoHomeOutline />}
+            hoverIcon={<IoHome />}
+            text="Koti"
+          />
         </li>
         <li>
-          <IconLink href="/" icon={<IoLibraryOutline />} text="Kirjasto" />
+          <IconLink
+            href="/"
+            icon={<IoLibraryOutline />}
+            hoverIcon={<IoLibrary />}
+            text="Kirjasto"
+          />
         </li>
         <li>
-          <IconLink href="/" icon={<IoPeopleOutline />} text="Kaverit" />
+          <IconLink
+            href="/"
+            icon={<IoPeopleOutline />}
+            hoverIcon={<IoPeople />}
+            text="Kaverit"
+          />
         </li>
         <li>
           <IconLink
             href="/"
             icon={<IoNotificationsOutline />}
+            hoverIcon={<IoNotifications />}
             text="Ilmoitukset"
           />
         </li>
