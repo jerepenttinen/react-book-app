@@ -117,7 +117,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                     <RadioGroup.Option
                       value={s.value}
                       as="label"
-                      className="label cursor-pointer hover:bg-primary-focus/25 focus:outline-none"
+                      className="label cursor-pointer rounded hover:bg-base-content/10 focus:outline-none"
                     >
                       {({ checked }) => (
                         <>
@@ -140,7 +140,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                 ))}
               </RadioGroup>
               {/* TODO: Toteuta tallennus! */}
-              <button className="btn-sm btn" onClick={() => close()}>
+              <button className="btn-sm btn mt-3" onClick={() => close()}>
                 Tallenna
               </button>
             </>
