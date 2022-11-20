@@ -101,4 +101,16 @@ export const booksRouter = router({
         },
       });
     }),
+  getSavedBookById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(({ input, ctx }) => {
+      return ctx.prisma.savedBook.findUnique({
+        where: {
+          bookId_userId: {
+            bookId: input.id,
+            userId: ctx.session.user.id,
+          },
+        },
+      });
+    }),
 });

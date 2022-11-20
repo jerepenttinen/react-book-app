@@ -82,6 +82,8 @@ model SavedBook {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   finishedAt DateTime?
   createdAt  DateTime  @default(now())
+
+  @@unique([bookId, userId])
 }
 
 model Review {

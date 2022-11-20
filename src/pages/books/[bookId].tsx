@@ -3,10 +3,14 @@ import { useRouter } from "next/router";
 import { trpc } from "~/utils/trpc";
 
 import Image from "next/image";
-import { ImFileEmpty } from "react-icons/im";
+import { ImFileEmpty, ImRadioUnchecked, ImRadioChecked } from "react-icons/im";
+import { IoLibrary } from "react-icons/io5";
 import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { Popover, RadioGroup } from "@headlessui/react";
 
 interface ReviewSectionProps {
   bookId: string;
@@ -57,6 +61,96 @@ function ReviewSection(props: ReviewSectionProps) {
   );
 }
 
+const shelves = [
+  {
+    value: "none",
+    text: "Ei hyllyssä?", // TODO: Parempi teksi tähän
+  },
+  {
+    value: "shelf",
+    text: "Hyllyssä",
+  },
+  {
+    value: "reading",
+    text: "Lukemassa",
+  },
+  {
+    value: "read",
+    text: "Luettu",
+  },
+];
+
+function AddToLibraryButton(props: ReviewSectionProps) {
+  const session = useSession();
+  const { data: savedBookData } = trpc.books.getSavedBookById.useQuery(
+    {
+      id: props.bookId,
+    },
+    {
+      retry: 0,
+      enabled: !!session.data,
+    },
+  );
+
+  const [shelf, setShelf] = useState(savedBookData?.shelf ?? "none");
+
+  if (!session.data) {
+    return <></>;
+  }
+
+  return (
+    <>
+      <Popover className="dropdown">
+        <Popover.Button className="btn w-full min-w-max gap-2">
+          <IoLibrary />
+          Kirjasto
+        </Popover.Button>
+        <Popover.Panel className="dropdown-content menu rounded-box w-40 bg-base-300 p-2 shadow">
+          {({ close }) => (
+            <>
+              <RadioGroup value={shelf} onChange={setShelf}>
+                <RadioGroup.Label as="li" className="menu-title">
+                  <span>Valitse hylly</span>
+                </RadioGroup.Label>
+                {shelves.map((s) => (
+                  <div className="form-control" key={s.value}>
+                    <RadioGroup.Option
+                      value={s.value}
+                      as="label"
+                      className="label cursor-pointer hover:bg-primary-focus/25 focus:outline-none"
+                    >
+                      {({ checked }) => (
+                        <>
+                          <span className={checked ? "text-primary" : ""}>
+                            {checked ? (
+                              <ImRadioChecked />
+                            ) : (
+                              <ImRadioUnchecked />
+                            )}
+                          </span>
+                          <span
+                            className={`${checked ? "active" : ""} label-text`}
+                          >
+                            {s.text}
+                          </span>
+                        </>
+                      )}
+                    </RadioGroup.Option>
+                  </div>
+                ))}
+              </RadioGroup>
+              {/* TODO: Toteuta tallennus! */}
+              <button className="btn-sm btn" onClick={() => close()}>
+                Tallenna
+              </button>
+            </>
+          )}
+        </Popover.Panel>
+      </Popover>
+    </>
+  );
+}
+
 const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
@@ -101,21 +195,24 @@ const BookPage: NextPage = () => {
   return (
     <>
       <div className="flex flex-row gap-8">
-        {volume.imageLinks && volume.imageLinks.thumbnail ? (
-          <Image
-            src={volume.imageLinks.thumbnail}
-            alt={`Kirjan ${volume.title} kansikuva`}
-            width={128}
-            height={300}
-            className="my-0 h-min rounded"
-            priority
-          />
-        ) : (
-          <div className="flex h-48 w-32 justify-center rounded bg-neutral">
-            <ImFileEmpty className="my-auto" />
-          </div>
-        )}
-        <div className="flex flex-grow flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          {volume.imageLinks?.thumbnail ? (
+            <Image
+              src={volume.imageLinks.thumbnail}
+              alt={`Kirjan ${volume.title} kansikuva`}
+              width={128}
+              height={300}
+              className="my-0 h-min rounded"
+              priority
+            />
+          ) : (
+            <div className="flex h-48 w-32 justify-center rounded bg-neutral">
+              <ImFileEmpty className="my-auto" />
+            </div>
+          )}
+          <AddToLibraryButton bookId={bookId} />
+        </div>
+        <div className="flex w-5/6 grow flex-col gap-4">
           <h1 className="my-0">{formatTitle(bookData)}</h1>
           <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
@@ -178,7 +275,7 @@ const BookPage: NextPage = () => {
             <h1 className="my-0">5.00</h1>
           </div>
           {volume.description && (
-            <div className="flex flex-col">
+            <div className="flex flex-shrink flex-col">
               <input
                 type="checkbox"
                 className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
