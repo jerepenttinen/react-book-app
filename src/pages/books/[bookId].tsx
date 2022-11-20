@@ -8,6 +8,55 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 
+interface ReviewSectionProps {
+  bookId: string;
+}
+function ReviewSection(props: ReviewSectionProps) {
+  const trpcContext = trpc.useContext();
+  const {
+    data: reviewData,
+    isLoading,
+    isError,
+    error,
+  } = trpc.books.getBookReviews.useQuery({
+    id: props.bookId,
+  });
+
+  const createReview = trpc.books.createReview.useMutation({
+    onSuccess: () => trpcContext.books.getBookReviews.invalidate(),
+  });
+
+  if (isError) {
+    return <>{error.message}</>;
+  }
+
+  if (isLoading) {
+    return <>Ladataan...</>;
+  }
+
+  return (
+    <section className="flex flex-col">
+      <span className="font-bold">Arvostelut</span>
+      <button
+        type="button"
+        className="btn-primary btn"
+        onClick={() =>
+          createReview.mutate({
+            bookId: props.bookId,
+            score: 9,
+            content: "TESTI ARVOSTELU, LUOTU PAINAMALLA TESTINAPPIA!",
+          })
+        }
+      >
+        Lisää testi arvostelu
+      </button>
+      {reviewData?.map((review) => (
+        <div key={review.id}>{review.content}</div>
+      ))}
+    </section>
+  );
+}
+
 const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
@@ -156,9 +205,7 @@ const BookPage: NextPage = () => {
         </div>
       </div>
       <div className="divider"></div>
-      <div className="flex flex-col">
-        <span className="font-bold">Arvostelut</span>
-      </div>
+      <ReviewSection bookId={bookId} />
     </>
   );
 };
