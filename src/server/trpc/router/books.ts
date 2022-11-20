@@ -26,6 +26,6 @@ export const booksRouter = router({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(({ input }): Promise<BookData> => {
-      return got.get(new BooksQuery().id(input.id)).json();
+      return got.get(new BooksQuery().id(input.id).build()).json();
     }),
 });
