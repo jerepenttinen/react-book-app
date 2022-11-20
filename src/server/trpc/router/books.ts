@@ -113,4 +113,64 @@ export const booksRouter = router({
         },
       });
     }),
+  updateSavedBook: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        shelf: z.enum(["none", "shelf", "reading", "read"]),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // TODO: this to function!
+      //////////////////////////
+      let book = await ctx.prisma.book.findFirst({
+        where: {
+          id: input.bookId,
+        },
+      });
+      if (book === null) {
+        const googleBook = await got
+          .get(new BooksQuery().id(input.bookId).build())
+          .json<BookData>();
+        if (googleBook !== null) {
+          book = await ctx.prisma.book.create({
+            data: {
+              id: googleBook.id,
+              name: googleBook.volumeInfo.title,
+              authors: googleBook.volumeInfo.authors?.join(", "),
+            },
+          });
+        } else {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+      }
+      //////////////////////////
+      if (input.shelf === "none") {
+        await ctx.prisma.savedBook.delete({
+          where: {
+            bookId_userId: {
+              bookId: book.id,
+              userId: ctx.session.user.id,
+            },
+          },
+        });
+      } else {
+        await ctx.prisma.savedBook.upsert({
+          where: {
+            bookId_userId: {
+              bookId: book.id,
+              userId: ctx.session.user.id,
+            },
+          },
+          update: {
+            shelf: input.shelf,
+          },
+          create: {
+            shelf: input.shelf,
+            userId: ctx.session.user.id,
+            bookId: input.bookId,
+          },
+        });
+      }
+    }),
 });

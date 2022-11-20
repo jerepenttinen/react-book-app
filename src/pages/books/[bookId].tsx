@@ -9,7 +9,7 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 
 interface ReviewSectionProps {
@@ -82,6 +82,7 @@ const shelves = [
 
 function AddToLibraryButton(props: ReviewSectionProps) {
   const session = useSession();
+  const trpcContext = trpc.useContext();
   const { data: savedBookData } = trpc.books.getSavedBookById.useQuery(
     {
       id: props.bookId,
@@ -92,7 +93,13 @@ function AddToLibraryButton(props: ReviewSectionProps) {
     },
   );
 
+  const updateSavedBook = trpc.books.updateSavedBook.useMutation();
+
   const [shelf, setShelf] = useState(savedBookData?.shelf ?? "none");
+  useEffect(
+    () => setShelf(savedBookData?.shelf ?? "none"),
+    [savedBookData?.shelf],
+  );
 
   if (!session.data) {
     return <></>;
@@ -140,7 +147,31 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                 ))}
               </RadioGroup>
               {/* TODO: Toteuta tallennus! */}
-              <button className="btn-sm btn mt-3" onClick={() => close()}>
+              <button
+                className="btn-sm btn mt-3"
+                onClick={() => {
+                  if (
+                    shelf === "none" ||
+                    shelf === "shelf" ||
+                    shelf === "reading" ||
+                    shelf === "read"
+                  ) {
+                    updateSavedBook.mutate(
+                      {
+                        bookId: props.bookId,
+                        shelf: shelf,
+                      },
+                      {
+                        onSuccess: () =>
+                          trpcContext.books.getSavedBookById.invalidate(),
+                      },
+                    );
+                    close();
+                  } else {
+                    console.error("Invalid shelf", shelf);
+                  }
+                }}
+              >
                 Tallenna
               </button>
             </>
