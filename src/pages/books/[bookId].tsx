@@ -162,8 +162,11 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                         shelf: shelf,
                       },
                       {
-                        onSuccess: () =>
-                          trpcContext.books.getSavedBookById.invalidate(),
+                        onSuccess: () => {
+                          // TODO: Oma reititin savedbookeille?
+                          trpcContext.books.getSavedBookById.invalidate();
+                          trpcContext.books.getReadingBooks.invalidate();
+                        },
                       },
                     );
                     close();

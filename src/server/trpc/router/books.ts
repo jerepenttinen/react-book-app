@@ -173,4 +173,15 @@ export const booksRouter = router({
         });
       }
     }),
+  getReadingBooks: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.savedBook.findMany({
+      where: {
+        userId: ctx.session.user.id,
+        shelf: "reading",
+      },
+      include: {
+        book: true,
+      },
+    });
+  }),
 });
