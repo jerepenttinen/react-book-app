@@ -1,9 +1,10 @@
 import { type BookData } from "~/server/googlebooks/book-types";
 import Image from "next/image";
 import { ImFileEmpty } from "react-icons/im";
+import { type Book } from "@prisma/client";
 
 interface BookCoverProps {
-  book: BookData;
+  book: BookData | Book;
   size: "s" | "l";
   compact?: boolean;
 }
@@ -23,8 +24,30 @@ const sizes = {
   },
 };
 
+function isBookType(book: BookData | Book): book is Book {
+  return (book as Book).createdAt !== undefined;
+}
+
+interface CommonBook {
+  thumbnail: string | undefined | null;
+  title: string | undefined | null;
+}
+
+function getCommonBook(book: BookData | Book): CommonBook {
+  if (isBookType(book)) {
+    return {
+      thumbnail: book.thumbnailUrl,
+      title: book.name,
+    };
+  } else {
+    return {
+      thumbnail: book.volumeInfo.imageLinks?.thumbnail,
+      title: book.volumeInfo.title,
+    };
+  }
+}
+
 function BookCover({ book, size, compact }: BookCoverProps) {
-  const volume = book.volumeInfo;
   const s = sizes[size];
 
   if (compact) {
@@ -33,12 +56,14 @@ function BookCover({ book, size, compact }: BookCoverProps) {
     s.th = "h-" + s.tw.split("-")[1];
   }
 
+  const common = getCommonBook(book);
+
   return (
     <>
-      {volume.imageLinks?.thumbnail ? (
+      {common.thumbnail ? (
         <Image
-          src={volume.imageLinks.thumbnail}
-          alt={`Kirjan ${volume.title} kansikuva`}
+          src={common.thumbnail}
+          alt={`Kirjan ${common.title} kansikuva`}
           width={s.width}
           height={s.height}
           className="my-0 h-min rounded"

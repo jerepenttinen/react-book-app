@@ -64,13 +64,14 @@ model VerificationToken {
 }
 
 model Book {
-  id         String      @id
-  name       String?
-  authors    String?
-  createdAt  DateTime    @default(now())
-  savedBooks SavedBook[]
-  reviews    Review[]
-  updates    Update[]
+  id           String      @id
+  name         String?
+  authors      String?
+  thumbnailUrl String?
+  createdAt    DateTime    @default(now())
+  savedBooks   SavedBook[]
+  reviews      Review[]
+  updates      Update[]
 }
 
 model SavedBook {
