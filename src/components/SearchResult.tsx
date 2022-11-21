@@ -1,8 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 
-import { ImFileEmpty } from "react-icons/im";
 import { type BookData } from "~/server/googlebooks/book-types";
+import BookCover from "./BookCover";
 
 export function formatTitle(book: BookData) {
   let title = "";
@@ -22,7 +21,6 @@ interface SearchResultProps {
 
 function SearchResult({ book, compact }: SearchResultProps) {
   const volume = book.volumeInfo;
-  const [imageWidth, imageHeight] = compact ? [64, 64] : [64, 96];
 
   return (
     <div className={`flex flex-row ${compact ? "gap-2" : "gap-4"}`}>
@@ -30,20 +28,7 @@ function SearchResult({ book, compact }: SearchResultProps) {
         href={`/books/${book.id}`}
         className={`w-16 rounded ${compact ? "h-16 overflow-clip" : "h-24"}`}
       >
-        {volume.imageLinks ? (
-          <Image
-            src={volume.imageLinks.thumbnail}
-            alt={`Kirjan ${volume.title} kansikuva`}
-            width={imageWidth}
-            height={imageHeight}
-            className="my-0 w-auto rounded"
-            priority
-          />
-        ) : (
-          <div className="flex h-full w-full justify-center rounded bg-neutral">
-            <ImFileEmpty className="my-auto" />
-          </div>
-        )}
+        <BookCover book={book} size="s" compact={compact} />
       </Link>
 
       <div className="prose flex w-4/5 flex-col">

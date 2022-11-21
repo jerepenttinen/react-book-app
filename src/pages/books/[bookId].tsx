@@ -2,8 +2,7 @@ import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "~/utils/trpc";
 
-import Image from "next/image";
-import { ImFileEmpty, ImRadioUnchecked, ImRadioChecked } from "react-icons/im";
+import { ImRadioUnchecked, ImRadioChecked } from "react-icons/im";
 import { IoLibrary } from "react-icons/io5";
 import { formatTitle } from "~/components/SearchResult";
 
@@ -11,6 +10,7 @@ import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
+import BookCover from "~/components/BookCover";
 
 interface ReviewSectionProps {
   bookId: string;
@@ -230,20 +230,7 @@ const BookPage: NextPage = () => {
     <>
       <div className="flex flex-row gap-8">
         <div className="flex flex-col gap-4">
-          {volume.imageLinks?.thumbnail ? (
-            <Image
-              src={volume.imageLinks.thumbnail}
-              alt={`Kirjan ${volume.title} kansikuva`}
-              width={128}
-              height={300}
-              className="my-0 h-min rounded"
-              priority
-            />
-          ) : (
-            <div className="flex h-48 w-32 justify-center rounded bg-neutral">
-              <ImFileEmpty className="my-auto" />
-            </div>
-          )}
+          <BookCover book={bookData} size="l" />
           <AddToLibraryButton bookId={bookId} />
         </div>
         <div className="flex w-5/6 grow flex-col gap-4">
