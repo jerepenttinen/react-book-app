@@ -5,6 +5,7 @@ import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { BooksData, BookData } from "~/server/googlebooks/book-types";
 import { TRPCError } from "@trpc/server";
 import { type Context } from "../context";
+import { formatTitle } from "~/components/SearchResult";
 
 const selectSafeUser = {
   id: true,
@@ -155,7 +156,7 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
       book = await ctx.prisma.book.create({
         data: {
           id: googleBook.id,
-          name: googleBook.volumeInfo.title,
+          name: formatTitle(googleBook),
           authors: googleBook.volumeInfo.authors?.join(", "),
           thumbnailUrl: googleBook.volumeInfo.imageLinks?.thumbnail,
         },
