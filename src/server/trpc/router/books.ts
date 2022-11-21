@@ -4,6 +4,7 @@ import { BooksQuery } from "~/server/googlebooks/query";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { BooksData, BookData } from "~/server/googlebooks/book-types";
 import { TRPCError } from "@trpc/server";
+import { type Context } from "../context";
 
 const selectSafeUser = {
   id: true,
@@ -44,30 +45,7 @@ export const booksRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // TODO: this to function!
-      //////////////////////////
-      let book = await ctx.prisma.book.findFirst({
-        where: {
-          id: input.bookId,
-        },
-      });
-      if (book === null) {
-        const googleBook = await got
-          .get(new BooksQuery().id(input.bookId).build())
-          .json<BookData>();
-        if (googleBook !== null) {
-          book = await ctx.prisma.book.create({
-            data: {
-              id: googleBook.id,
-              name: googleBook.volumeInfo.title,
-              authors: googleBook.volumeInfo.authors?.join(", "),
-            },
-          });
-        } else {
-          throw new TRPCError({ code: "NOT_FOUND" });
-        }
-      }
-      //////////////////////////
+      await loadBookToDatabase(ctx, input.bookId);
       return await ctx.prisma.review.upsert({
         where: {
           bookId_userId: {
@@ -121,30 +99,7 @@ export const booksRouter = router({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // TODO: this to function!
-      //////////////////////////
-      let book = await ctx.prisma.book.findFirst({
-        where: {
-          id: input.bookId,
-        },
-      });
-      if (book === null) {
-        const googleBook = await got
-          .get(new BooksQuery().id(input.bookId).build())
-          .json<BookData>();
-        if (googleBook !== null) {
-          book = await ctx.prisma.book.create({
-            data: {
-              id: googleBook.id,
-              name: googleBook.volumeInfo.title,
-              authors: googleBook.volumeInfo.authors?.join(", "),
-            },
-          });
-        } else {
-          throw new TRPCError({ code: "NOT_FOUND" });
-        }
-      }
-      //////////////////////////
+      const book = await loadBookToDatabase(ctx, input.bookId);
       if (input.shelf === "none") {
         await ctx.prisma.savedBook.delete({
           where: {
@@ -185,3 +140,29 @@ export const booksRouter = router({
     });
   }),
 });
+
+async function loadBookToDatabase(ctx: Context, bookId: string) {
+  let book = await ctx.prisma.book.findFirst({
+    where: {
+      id: bookId,
+    },
+  });
+  if (book === null) {
+    const googleBook = await got
+      .get(new BooksQuery().id(bookId).build())
+      .json<BookData>();
+    if (googleBook !== null) {
+      book = await ctx.prisma.book.create({
+        data: {
+          id: googleBook.id,
+          name: googleBook.volumeInfo.title,
+          authors: googleBook.volumeInfo.authors?.join(", "),
+          thumbnailUrl: googleBook.volumeInfo.imageLinks?.thumbnail,
+        },
+      });
+    } else {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+  }
+  return book;
+}
