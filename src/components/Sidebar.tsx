@@ -12,6 +12,7 @@ import {
   IoNotifications,
 } from "react-icons/io5";
 import { trpc } from "~/utils/trpc";
+import BookCover from "./BookCover";
 
 interface IconLinkProps {
   href: string;
@@ -43,7 +44,7 @@ function Sidebar() {
       enabled: !!session.data,
     },
   );
-  console.log(readingBooksData);
+
   return (
     <div className="drawer-side">
       <ul className="menu w-72 bg-base-300">
@@ -84,11 +85,39 @@ function Sidebar() {
             <li className="menu-title">
               <span>Parhaillaan lukemassa</span>
             </li>
-            {readingBooksData.map((savedBook) => (
-              <li key={savedBook.id}>
-                <a>{savedBook.book.name}</a>
-              </li>
-            ))}
+            <section className="flex flex-col gap-8">
+              {readingBooksData.map((savedBook) => (
+                <div
+                  key={savedBook.id}
+                  className="flex h-min flex-row gap-4 px-4"
+                >
+                  <Link
+                    href={`/books/${savedBook.bookId}`}
+                    className="h-24 w-16 p-0"
+                  >
+                    <BookCover
+                      book={savedBook.book}
+                      size="s"
+                      key={savedBook.id + "sidecover"}
+                    />
+                  </Link>
+                  <div className="flex w-3/5 flex-col gap-1 p-0">
+                    <Link
+                      href={`/books/${savedBook.bookId}`}
+                      className="font-bold"
+                    >
+                      {savedBook.book.name}
+                    </Link>
+                    <span>
+                      {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+                    </span>
+                    <button type="button" className="btn-sm btn">
+                      Päivitä
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </section>
           </>
         )}
       </ul>
