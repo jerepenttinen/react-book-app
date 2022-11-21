@@ -85,7 +85,7 @@ function Sidebar() {
             <li className="menu-title">
               <span>Parhaillaan lukemassa</span>
             </li>
-            <section className="flex flex-col gap-8">
+            <section className="mt-2 flex flex-col gap-8">
               {readingBooksData.map((savedBook) => (
                 <div
                   key={savedBook.id}
