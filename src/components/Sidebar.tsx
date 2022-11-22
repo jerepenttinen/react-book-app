@@ -58,7 +58,7 @@ function Sidebar() {
         </li>
         <li>
           <IconLink
-            href="/"
+            href="/library"
             icon={<IoLibraryOutline />}
             hoverIcon={<IoLibrary />}
             text="Kirjasto"
