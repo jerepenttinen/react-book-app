@@ -67,7 +67,7 @@ const LibraryPage: NextPage = () => {
       columnHelper.accessor("bookId", {
         header: () => <span>Arvostelu</span>,
         cell: () => (
-          <button type="button" className="btn btn-sm">
+          <button type="button" className="btn-sm btn">
             Tähdet...
           </button>
         ),
@@ -85,14 +85,14 @@ const LibraryPage: NextPage = () => {
         header: () => <span>Lisätty</span>,
         cell: (cell) => formatDate(cell.getValue()),
       }),
-      columnHelper.accessor("book", {
+      columnHelper.accessor("book.id", {
         header: () => <span></span>,
         cell: (cell) => (
           <button
             type="button"
-            className="btn btn-sm btn-circle"
+            className="btn-sm btn-circle btn"
             onClick={() => {
-              setTargetBook(cell.getValue());
+              setTargetBook(cell.row.original.book);
               setIsOpen(true);
             }}
           >
@@ -193,7 +193,7 @@ const LibraryPage: NextPage = () => {
             >
               Poista
             </button>
-            <button className="btn btn-error" onClick={() => setIsOpen(false)}>
+            <button className="btn-error btn" onClick={() => setIsOpen(false)}>
               Peruuta
             </button>
           </div>

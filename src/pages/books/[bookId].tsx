@@ -108,7 +108,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
   return (
     <>
       <Popover className="dropdown">
-        <Popover.Button className="btn w-full min-w-max gap-2">
+        <Popover.Button className="btn-primary btn-sm btn w-full min-w-max gap-2">
           <IoLibrary />
           Kirjasto
         </Popover.Button>

@@ -43,7 +43,7 @@ function Searchbar() {
     <>
       <button
         onClick={() => setIsOpen((open) => !open)}
-        className="inline-flex w-full max-w-lg flex-row content-center gap-2 rounded-full border border-base-content border-opacity-20 p-3"
+        className="inline-flex w-full max-w-lg flex-row content-center gap-2 rounded-full border border-medium p-3 text-medium"
       >
         <IoSearchOutline size="24" />
         <span>Etsi kirjoja</span>
@@ -55,19 +55,19 @@ function Searchbar() {
         open={isOpen}
         onClose={() => setIsOpen(false)}
       >
-        <Dialog.Panel className="modal-box border border-base-content border-opacity-20">
+        <Dialog.Panel className="modal-box border border-medium">
           <Dialog.Title>
             <div className="relative flex">
               <input
                 type="text"
                 placeholder="Etsi kirjoja"
-                className="input-bordered input w-full rounded-full pl-14"
+                className="input-bordered input w-full rounded-full pl-14 placeholder:text-medium"
                 onChange={(e) => setSearch(e.target.value)}
                 autoFocus
               />
               <IoSearchOutline
                 size="24"
-                className="absolute inset-y-3 inset-x-4"
+                className="absolute inset-y-3 inset-x-4 text-medium"
               />
             </div>
           </Dialog.Title>
