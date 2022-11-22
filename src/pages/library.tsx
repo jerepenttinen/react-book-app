@@ -11,9 +11,20 @@ import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import { IoCloseOutline } from "react-icons/io5";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
+
+export function formatDate(date?: Date | null) {
+  return date ? dayjs(date).format("DD.MM.YYYY") : "";
+}
+
+const shelves = new Map<string, string>([
+  ["shelf", "Hyllyssä"],
+  ["reading", "Lukemassa"],
+  ["read", "Luettu"],
+]);
 
 const columns = [
   columnHelper.accessor("book", {
@@ -38,21 +49,21 @@ const columns = [
   }),
   columnHelper.accessor("shelf", {
     header: () => <span>Hylly</span>,
+    cell: (cell) => shelves.get(cell.getValue()),
   }),
   columnHelper.accessor("finishedAt", {
     header: () => <span>Luettu</span>,
-    cell: (cell) => cell.getValue()?.toUTCString(),
+    cell: (cell) => formatDate(cell.getValue()),
   }),
   columnHelper.accessor("createdAt", {
     header: () => <span>Lisätty</span>,
-    cell: (cell) => cell.getValue()?.toUTCString(),
+    cell: (cell) => formatDate(cell.getValue()),
   }),
   columnHelper.accessor("id", {
     header: () => <span></span>,
     cell: () => (
-      // TODO: Hiukan iso tämä...
-      <button type="button" className="btn-circle btn">
-        <IoCloseOutline className="h-6 w-6" />
+      <button type="button" className="btn-sm btn-circle btn">
+        <IoCloseOutline className="h-5 w-5" />
       </button>
     ),
     enableSorting: false,
