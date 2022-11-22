@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../trpc";
 
-const safeUserSelect = {
+const minimalUserSelect = {
   id: true,
   name: true,
   image: true,
@@ -15,7 +15,12 @@ export const usersRouter = router({
         where: {
           id: input.id,
         },
-        select: safeUserSelect,
+        select: {
+          ...minimalUserSelect,
+          createdAt: true,
+          biography: true,
+          location: true,
+        },
       });
     }),
 });
