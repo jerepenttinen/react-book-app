@@ -85,7 +85,7 @@ function Sidebar() {
             <li className="menu-title">
               <span>Parhaillaan lukemassa</span>
             </li>
-            <section className="mt-2 flex flex-col gap-8">
+            <section className="mt-2 mb-8 flex flex-col gap-8">
               {readingBooksData.map((savedBook) => (
                 <div
                   key={savedBook.id}
@@ -111,7 +111,7 @@ function Sidebar() {
                     <span>
                       {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
                     </span>
-                    <button type="button" className="btn-sm btn">
+                    <button type="button" className="btn btn-sm">
                       Päivitä
                     </button>
                   </div>
