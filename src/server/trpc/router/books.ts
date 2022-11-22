@@ -129,10 +129,12 @@ export const booksRouter = router({
         });
       }
     }),
-  getReadingBooks: protectedProcedure.query(({ ctx }) => {
+  getReadingBooks: protectedProcedure
+  .input(z.optional(z.object({ userId: z.optional(z.string()) })))
+  .query(({ input, ctx }) => {
     return ctx.prisma.savedBook.findMany({
       where: {
-        userId: ctx.session.user.id,
+        userId: (input && input.userId) ? input.userId : ctx.session.user.id,
         shelf: "reading",
       },
       include: {
