@@ -140,6 +140,23 @@ export const booksRouter = router({
       },
     });
   }),
+  getBookAverageScoreById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(({ input, ctx }) => {
+      return ctx.prisma.review.aggregate({
+        _count: {
+          score: true,
+        },
+        _avg: {
+          score: true,
+        },
+        where: {
+          bookId: {
+            equals: input.id,
+          },
+        },
+      });
+    }),
 });
 
 async function loadBookToDatabase(ctx: Context, bookId: string) {

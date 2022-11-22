@@ -185,6 +185,51 @@ function AddToLibraryButton(props: ReviewSectionProps) {
   );
 }
 
+function BookScore({ bookId }: { bookId: string }) {
+  const { data: starData } = trpc.books.getBookAverageScoreById.useQuery(
+    {
+      id: bookId,
+    },
+    {
+      enabled: !!bookId,
+      retry: 0,
+    },
+  );
+  const score = starData?._avg.score ? starData._avg.score / 2 : 0;
+  const starPercentages = [0, 0, 0, 0, 0];
+
+  for (let i = 0; i < score; i++) {
+    starPercentages[i] = 1;
+  }
+
+  if (score < 5) {
+    // Set last star to the fraction of the score
+    starPercentages[Math.floor(score)] = score % 1;
+  }
+
+  console.log(starData);
+  return (
+    <div className="my-0 inline-flex gap-2">
+      <div className="inline-flex gap-px">
+        {starPercentages.map((perc, i) => (
+          <div key={i + "star"} className="h-10 w-10">
+            <div
+              style={{ width: `${2.5 * perc}rem` }}
+              className="absolute h-10 overflow-hidden"
+            >
+              <div className="mask mask-star-2 h-10 w-10 bg-secondary"></div>
+            </div>
+            <div className="mask mask-star-2 absolute h-10 w-10 bg-secondary/20"></div>
+          </div>
+        ))}
+      </div>
+      <h1 className="my-0" title={`${starData?._count.score ?? 0} arvostelua`}>
+        {score.toFixed(2)}
+      </h1>
+    </div>
+  );
+}
+
 const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
@@ -239,7 +284,7 @@ const BookPage: NextPage = () => {
 
           <div className="my-0 inline-flex gap-2">
             {/* TODO: Komponentti tästä */}
-            <div className="rating rating-lg rating-half my-0">
+            {/* <div className="rating rating-lg rating-half my-0">
               <input type="radio" name="rating-10" className="rating-hidden" />
               <input
                 type="radio"
@@ -291,9 +336,9 @@ const BookPage: NextPage = () => {
                 name="rating-10"
                 className="mask mask-half-2 mask-star-2 bg-secondary"
               />
-            </div>
+            </div> */}
 
-            <h1 className="my-0">5.00</h1>
+            <BookScore bookId={bookId} />
           </div>
           {volume.description && (
             <div className="flex flex-shrink flex-col">
