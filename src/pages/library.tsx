@@ -2,12 +2,15 @@ import { type NextPage } from "next/types";
 import {
   createColumnHelper,
   getCoreRowModel,
+  getSortedRowModel,
+  type SortingState,
   flexRender,
   useReactTable,
 } from "@tanstack/react-table";
 import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import { IoCloseOutline } from "react-icons/io5";
+import { useState } from "react";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
@@ -16,6 +19,7 @@ const columns = [
   columnHelper.accessor("book", {
     header: () => <span>Kansi</span>,
     cell: (cell) => <BookCover book={cell.getValue()} size="s" />,
+    enableSorting: false,
   }),
   columnHelper.accessor("book.name", {
     header: () => <span>Nimi</span>,
@@ -30,6 +34,7 @@ const columns = [
         Tähdet...
       </button>
     ),
+    enableSorting: false,
   }),
   columnHelper.accessor("shelf", {
     header: () => <span>Hylly</span>,
@@ -50,17 +55,25 @@ const columns = [
         <IoCloseOutline className="h-6 w-6" />
       </button>
     ),
+    enableSorting: false,
   }),
 ];
 
 const LibraryPage: NextPage = () => {
   const { data } = trpc.books.getSavedBooks.useQuery();
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const tableData = data ?? ([] as RowType[]);
 
   const table = useReactTable({
     data: tableData,
     columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -72,12 +85,21 @@ const LibraryPage: NextPage = () => {
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
+                  {header.isPlaceholder ? null : (
+                    <div
+                      className={
+                        header.column.getCanSort()
+                          ? "cursor-pointer select-none"
+                          : ""
+                      }
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
+                    </div>
+                  )}
                 </th>
               ))}
             </tr>
