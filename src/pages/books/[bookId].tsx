@@ -212,7 +212,7 @@ function BookScore({ bookId }: { bookId: string }) {
     <div className="my-0 inline-flex gap-2">
       <div className="inline-flex gap-px">
         {starPercentages.map((perc, i) => (
-          <div key={i + "star"} className="h-10 w-10">
+          <div key={i + "star"} className="relative h-10 w-10">
             <div
               style={{ width: `${2.5 * perc}rem` }}
               className="absolute h-10 overflow-hidden"
