@@ -235,6 +235,7 @@ const BookPage: NextPage = () => {
   const { bookId } = router.query;
 
   const descriptionRef = useRef<HTMLDivElement>(null);
+  const [descriptionHasOverflow, setDescriptionHasOverflow] = useState(false);
 
   const {
     data: bookData,
@@ -250,6 +251,15 @@ const BookPage: NextPage = () => {
       retry: 0,
     },
   );
+
+  useEffect(() => {
+    setDescriptionHasOverflow(
+      !!descriptionRef.current
+        ? descriptionRef.current.clientHeight <=
+            descriptionRef.current.scrollHeight
+        : false,
+    );
+  }, [descriptionRef]);
 
   if (
     typeof bookId !== "string" ||
@@ -272,10 +282,6 @@ const BookPage: NextPage = () => {
   }
 
   const volume = bookData.volumeInfo;
-
-  const descriptionHasOverflow = !!descriptionRef.current
-    ? descriptionRef.current.clientHeight <= descriptionRef.current.scrollHeight
-    : false;
 
   return (
     <>
