@@ -68,7 +68,7 @@ function Sidebar() {
         </li>
         <li>
           <IconLink
-            href="/"
+            href="/friends"
             icon={<IoPeopleOutline />}
             hoverIcon={<IoPeople />}
             text="Kaverit"

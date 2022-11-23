@@ -43,19 +43,21 @@ model Session {
 }
 
 model User {
-  id            String      @id @default(cuid())
-  name          String?
-  email         String?     @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime    @default(now())
-  location      String?
-  biography     String?
-  accounts      Account[]
-  sessions      Session[]
-  savedBooks    SavedBook[]
-  reviews       Review[]
-  updates       Update[]
+  id             String      @id @default(cuid())
+  name           String?
+  email          String?     @unique
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime    @default(now())
+  location       String?
+  biography      String?
+  accounts       Account[]
+  sessions       Session[]
+  savedBooks     SavedBook[]
+  reviews        Review[]
+  updates        Update[]
+  friends        User[]      @relation("friends")
+  friendRelation User[]      @relation("friends")
 }
 
 model VerificationToken {

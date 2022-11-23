@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 
 const minimalUserSelect = {
   id: true,
@@ -23,4 +23,16 @@ export const usersRouter = router({
         },
       });
     }),
+  getMyFriends: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.user.findFirstOrThrow({
+      where: {
+        id: ctx.session.user.id,
+      },
+      include: {
+        friends: {
+          select: minimalUserSelect,
+        },
+      },
+    });
+  }),
 });
