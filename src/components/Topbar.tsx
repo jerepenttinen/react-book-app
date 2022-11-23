@@ -8,8 +8,9 @@ import { IoSearchOutline } from "react-icons/io5";
 import useDebounce from "~/hooks/useDebounce";
 import { trpc } from "~/utils/trpc";
 import SearchResult from "./SearchResult";
+import { IoReorderThreeOutline } from "react-icons/io5";
 
-function Searchbar() {
+export function Searchbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -43,7 +44,7 @@ function Searchbar() {
     <>
       <button
         onClick={() => setIsOpen((open) => !open)}
-        className="inline-flex w-full max-w-lg flex-row content-center gap-2 rounded-full border border-medium p-3 text-medium"
+        className="inline-flex w-full flex-row content-center gap-2 rounded-full border border-medium p-3 text-medium"
       >
         <IoSearchOutline size="24" />
         <span>Etsi kirjoja</span>
@@ -91,7 +92,14 @@ function Topbar() {
   const session = useSession();
   return (
     <div className="sticky top-0 z-10 flex h-16 items-center justify-between gap-5 bg-base-300 bg-opacity-50 py-2 px-5 backdrop-blur">
-      <Searchbar />
+      <div className="flex-none lg:hidden">
+        <label htmlFor="my-drawer" className="btn-ghost btn-square btn">
+          <IoReorderThreeOutline size={32} />
+        </label>
+      </div>
+      <div className="invisible lg:visible lg:w-full lg:max-w-lg">
+        <Searchbar />
+      </div>
 
       {session.data ? (
         <div className="dropdown dropdown-end h-12">

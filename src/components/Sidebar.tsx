@@ -13,6 +13,7 @@ import {
 } from "react-icons/io5";
 import { trpc } from "~/utils/trpc";
 import BookCover from "./BookCover";
+import { Searchbar } from "./Topbar";
 
 interface IconLinkProps {
   href: string;
@@ -47,6 +48,7 @@ function Sidebar() {
 
   return (
     <div className="drawer-side">
+      <label htmlFor="my-drawer" className="drawer-overlay"></label>
       <ul className="menu w-72 bg-base-300">
         <li>
           <IconLink
@@ -80,9 +82,12 @@ function Sidebar() {
             text="Ilmoitukset"
           />
         </li>
+        <div className="visible mx-4 mt-2 lg:hidden">
+          <Searchbar />
+        </div>
         {readingBooksData && readingBooksData.length > 0 && (
           <>
-            <section className="mt-2 mb-8 flex flex-col gap-8 px-4">
+            <section className="my-8 flex flex-col gap-8 px-4">
               <div className="divider my-0 text-medium"></div>
               <span className="text-lg font-bold">Parhaillaan lukemassa</span>
               {readingBooksData.map((savedBook) => (
