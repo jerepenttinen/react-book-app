@@ -108,7 +108,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
   return (
     <>
       <Popover className="dropdown">
-        <Popover.Button className="btn-primary btn-sm btn w-full min-w-max gap-2">
+        <Popover.Button className="btn-primary btn-sm btn w-32 min-w-max gap-2 lg:w-full">
           <IoLibrary />
           Kirjasto
         </Popover.Button>
@@ -285,12 +285,12 @@ const BookPage: NextPage = () => {
 
   return (
     <>
-      <div className="flex flex-row gap-8">
+      <div className="flex flex-col gap-8 lg:flex-row">
         <div className="flex flex-col gap-4">
           <BookCover book={bookData} size="l" />
           <AddToLibraryButton bookId={bookId} />
         </div>
-        <div className="flex w-5/6 grow flex-col gap-4">
+        <div className="flex w-full grow flex-col gap-4 lg:w-5/6">
           <h1 className="my-0">{formatTitle(bookData)}</h1>
           <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
