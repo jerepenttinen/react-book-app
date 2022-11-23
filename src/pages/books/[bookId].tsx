@@ -362,7 +362,7 @@ const BookPage: NextPage = () => {
               )}
               <div
                 ref={descriptionRef}
-                className="order-1 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents"
+                className="order-1 overflow-y-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents"
               >
                 {parse(volume.description)}
               </div>
