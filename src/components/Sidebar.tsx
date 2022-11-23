@@ -82,12 +82,12 @@ function Sidebar() {
             text="Ilmoitukset"
           />
         </li>
-        <div className="visible mx-4 mt-2 lg:hidden">
+        <div className="visible mx-4 mt-4 mb-2 lg:hidden">
           <Searchbar />
         </div>
         {readingBooksData && readingBooksData.length > 0 && (
           <>
-            <section className="my-8 flex flex-col gap-8 px-4">
+            <section className="mb-8 mt-6 flex flex-col gap-8 px-4">
               <div className="divider my-0 text-medium"></div>
               <span className="text-lg font-bold">Parhaillaan lukemassa</span>
               {readingBooksData.map((savedBook) => (
