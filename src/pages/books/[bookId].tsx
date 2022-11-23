@@ -8,7 +8,7 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
@@ -234,6 +234,8 @@ const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
 
+  const descriptionRef = useRef<HTMLDivElement>(null);
+
   const {
     data: bookData,
     isLoading,
@@ -270,6 +272,10 @@ const BookPage: NextPage = () => {
   }
 
   const volume = bookData.volumeInfo;
+
+  const descriptionHasOverflow = !!descriptionRef.current
+    ? descriptionRef.current.clientHeight <= descriptionRef.current.scrollHeight
+    : false;
 
   return (
     <>
@@ -342,11 +348,16 @@ const BookPage: NextPage = () => {
           </div>
           {volume.description && (
             <div className="flex flex-shrink flex-col">
-              <input
-                type="checkbox"
-                className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
-              />
-              <div className="order-1 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents">
+              {descriptionHasOverflow && (
+                <input
+                  type="checkbox"
+                  className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
+                />
+              )}
+              <div
+                ref={descriptionRef}
+                className="order-1 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents"
+              >
                 {parse(volume.description)}
               </div>
             </div>
