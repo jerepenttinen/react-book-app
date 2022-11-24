@@ -76,7 +76,6 @@ model Book {
   createdAt    DateTime    @default(now())
   savedBooks   SavedBook[]
   reviews      Review[]
-  updates      Update[]
 }
 
 model SavedBook {
@@ -88,6 +87,7 @@ model SavedBook {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   finishedAt DateTime?
   createdAt  DateTime  @default(now())
+  updates    Update[]
 
   @@unique([bookId, userId])
 }
@@ -106,12 +106,12 @@ model Review {
 }
 
 model Update {
-  id        String   @id @default(cuid())
-  content   String
-  progress  Int
-  bookId    String
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id          String    @id @default(cuid())
+  content     String
+  progress    Int
+  savedBookId String
+  savedBook   SavedBook @relation(fields: [savedBookId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
 }
