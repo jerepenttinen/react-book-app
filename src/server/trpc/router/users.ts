@@ -1,5 +1,7 @@
+import { type Notification } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { type Context } from "../context";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 
 const minimalUserSelect = {
@@ -94,16 +96,31 @@ export const usersRouter = router({
 
       const existingNotification = await ctx.prisma.notification.findMany({
         where: {
-          fromUserId: ctx.session.user.id,
+          OR: [
+            {
+              fromUserId: ctx.session.user.id,
+              toUserId: input.targetUserId,
+              type: "friend",
+            },
+            {
+              fromUserId: input.targetUserId,
+              toUserId: ctx.session.user.id,
+              type: "friend",
+            },
+          ],
         },
       });
 
-      if (existingNotification.length !== 0) {
-        throw new TRPCError({
-          message: "Friend request has already been sent",
-          code: "CONFLICT",
-        });
-      }
+      existingNotification.forEach((notification) => {
+        if (notification.fromUserId === ctx.session.user.id) {
+          throw new TRPCError({
+            message: "Friend request has already been sent",
+            code: "CONFLICT",
+          });
+        } else if (notification.toUserId === ctx.session.user.id) {
+          acceptFriendRequest(ctx, notification);
+        }
+      });
 
       return await ctx.prisma.notification.create({
         data: {
@@ -113,4 +130,67 @@ export const usersRouter = router({
         },
       });
     }),
+  handleFriendRequest: protectedProcedure
+    .input(z.object({ notificationId: z.string(), accept: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const notification = await ctx.prisma.notification.findFirstOrThrow({
+        where: {
+          id: input.notificationId,
+          toUserId: ctx.session.user.id,
+          type: "friend",
+        },
+      });
+
+      if (!input.accept) {
+        return ctx.prisma.notification.delete({
+          where: {
+            id: notification.id,
+          },
+        });
+      }
+
+      return acceptFriendRequest(ctx, notification);
+    }),
 });
+
+async function acceptFriendRequest(ctx: Context, notification: Notification) {
+  if (!notification.fromUserId) {
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  }
+
+  if (notification.type !== "friend") {
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  }
+
+  return await ctx.prisma.$transaction([
+    ctx.prisma.user.update({
+      where: {
+        id: notification.fromUserId,
+      },
+      data: {
+        friends: {
+          connect: {
+            id: notification.toUserId,
+          },
+        },
+      },
+    }),
+    ctx.prisma.user.update({
+      where: {
+        id: notification.toUserId,
+      },
+      data: {
+        friends: {
+          connect: {
+            id: notification.fromUserId,
+          },
+        },
+      },
+    }),
+    ctx.prisma.notification.delete({
+      where: {
+        id: notification.id,
+      },
+    }),
+  ]);
+}
