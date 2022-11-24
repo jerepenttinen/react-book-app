@@ -36,6 +36,37 @@ function IconLink(props: IconLinkProps) {
   );
 }
 
+function NotificationsLink() {
+  const session = useSession();
+  const { data: notificationCountData } =
+    trpc.users.getMyNotificationsCount.useQuery(undefined, {
+      retry: 0,
+      enabled: !!session.data,
+    });
+  const [isHovering, setIsHovering] = useState(false);
+
+  return (
+    <Link
+      className="inline-flex items-baseline justify-start gap-2 py-4 text-lg font-bold"
+      href="/notifications"
+      onMouseOver={() => setIsHovering(true)}
+      onMouseOut={() => setIsHovering(false)}
+    >
+      <div className="indicator">
+        <span
+          className={`badge-error badge badge-xs indicator-item ${
+            notificationCountData ? "" : "hidden"
+          }`}
+        >
+          {notificationCountData}
+        </span>
+        {isHovering ? <IoNotifications /> : <IoNotificationsOutline />}
+      </div>
+      Ilmoitukset
+    </Link>
+  );
+}
+
 function Sidebar() {
   const session = useSession();
   const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
@@ -75,12 +106,7 @@ function Sidebar() {
           />
         </li>
         <li>
-          <IconLink
-            href="/"
-            icon={<IoNotificationsOutline />}
-            hoverIcon={<IoNotifications />}
-            text="Ilmoitukset"
-          />
+          <NotificationsLink />
         </li>
         <div className="visible mx-4 mt-4 mb-2 lg:hidden">
           <Searchbar />
@@ -125,7 +151,6 @@ function Sidebar() {
           </>
         )}
       </ul>
-      {/* Kirjoja */}
     </div>
   );
 }

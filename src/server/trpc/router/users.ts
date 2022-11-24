@@ -43,6 +43,11 @@ export const usersRouter = router({
       where: {
         toUserId: ctx.session.user.id,
       },
+      include: {
+        fromUser: {
+          select: minimalUserSelect,
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
