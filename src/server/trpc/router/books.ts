@@ -130,18 +130,18 @@ export const booksRouter = router({
       }
     }),
   getReadingBooks: protectedProcedure
-  .input(z.optional(z.object({ userId: z.optional(z.string()) })))
-  .query(({ input, ctx }) => {
-    return ctx.prisma.savedBook.findMany({
-      where: {
-        userId: (input && input.userId) ? input.userId : ctx.session.user.id,
-        shelf: "reading",
-      },
-      include: {
-        book: true,
-      },
-    });
-  }),
+    .input(z.optional(z.object({ userId: z.optional(z.string()) })))
+    .query(({ input, ctx }) => {
+      return ctx.prisma.savedBook.findMany({
+        where: {
+          userId: input && input.userId ? input.userId : ctx.session.user.id,
+          shelf: "reading",
+        },
+        include: {
+          book: true,
+        },
+      });
+    }),
   getBookAverageScoreById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(({ input, ctx }) => {
@@ -168,7 +168,15 @@ export const booksRouter = router({
         createdAt: "desc",
       },
       include: {
-        book: true,
+        book: {
+          include: {
+            reviews: {
+              where: {
+                userId: ctx.session.user.id,
+              },
+            },
+          },
+        },
       },
     });
   }),

@@ -64,13 +64,39 @@ const LibraryPage: NextPage = () => {
       columnHelper.accessor("book.authors", {
         header: () => <span>Kirjailija</span>,
       }),
-      columnHelper.accessor("bookId", {
+      columnHelper.accessor("book.reviews", {
         header: () => <span>Arvostelu</span>,
-        cell: () => (
-          <button type="button" className="btn-sm btn">
-            Tähdet...
-          </button>
-        ),
+        cell: (cell) => {
+          const score = (cell.getValue().at(0)?.score ?? 0) / 2;
+          const starPercentages = [0, 0, 0, 0, 0];
+
+          for (let i = 0; i < score; i++) {
+            starPercentages[i] = 1;
+          }
+
+          if (score < 5) {
+            // Set last star to the fraction of the score
+            starPercentages[Math.floor(score)] = score % 1;
+          }
+          return (
+            <button
+              type="button"
+              className="btn-ghost btn-sm btn inline-flex w-max gap-px px-0"
+            >
+              {starPercentages.map((perc, i) => (
+                <div key={i + "star"} className="relative h-4 w-4">
+                  <div
+                    style={{ width: `${perc}rem` }}
+                    className="absolute h-4 overflow-hidden"
+                  >
+                    <div className="mask mask-star-2 h-4 w-4 bg-secondary"></div>
+                  </div>
+                  <div className="mask mask-star-2 absolute h-4 w-4 bg-secondary/20"></div>
+                </div>
+              ))}
+            </button>
+          );
+        },
         enableSorting: false,
       }),
       columnHelper.accessor("shelf", {
