@@ -114,7 +114,7 @@ function Sidebar() {
                     </span>
                     <button
                       type="button"
-                      className="btn-sm btn bordered w-min border-medium px-8 hover:border-medium/50"
+                      className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
                     >
                       Päivitä
                     </button>
