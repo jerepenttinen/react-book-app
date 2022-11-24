@@ -146,9 +146,8 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                   </div>
                 ))}
               </RadioGroup>
-              {/* TODO: Toteuta tallennus! */}
               <button
-                className="btn-sm btn mt-3"
+                className="btn-primary btn-sm btn mt-3"
                 onClick={() => {
                   if (
                     shelf === "none" ||
