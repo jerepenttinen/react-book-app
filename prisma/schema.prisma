@@ -43,21 +43,23 @@ model Session {
 }
 
 model User {
-  id             String      @id @default(cuid())
-  name           String?
-  email          String?     @unique
-  emailVerified  DateTime?
-  image          String?
-  createdAt      DateTime    @default(now())
-  location       String?
-  biography      String?
-  accounts       Account[]
-  sessions       Session[]
-  savedBooks     SavedBook[]
-  reviews        Review[]
-  updates        Update[]
-  friends        User[]      @relation("friends")
-  friendRelation User[]      @relation("friends")
+  id                String         @id @default(cuid())
+  name              String?
+  email             String?        @unique
+  emailVerified     DateTime?
+  image             String?
+  createdAt         DateTime       @default(now())
+  location          String?
+  biography         String?
+  accounts          Account[]
+  sessions          Session[]
+  savedBooks        SavedBook[]
+  reviews           Review[]
+  updates           Update[]
+  friends           User[]         @relation("friends")
+  friendRelation    User[]         @relation("friends")
+  notifications     Notification[] @relation("notifications")
+  sentNotifications Notification[] @relation("sentNotifications")
 }
 
 model VerificationToken {
@@ -114,4 +116,15 @@ model Update {
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  type       String
+  toUserId   String
+  toUser     User     @relation("notifications", fields: [toUserId], references: [id])
+  fromUserId String?
+  fromUser   User?    @relation("sentNotifications", fields: [fromUserId], references: [id])
+  createdAt  DateTime @default(now())
+  handled    Boolean  @default(false)
 }

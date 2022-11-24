@@ -6,6 +6,23 @@ import BookCover from "~/components/BookCover";
 import Link from "next/link";
 import { formatDate } from "../library";
 
+function AddFriendButton(props: { userId: string }) {
+  const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
+  return (
+    <button
+      type="button"
+      className="btn-primary btn-lg btn rounded-full"
+      onClick={() => {
+        addFriendMutation.mutate({
+          targetUserId: props.userId,
+        });
+      }}
+    >
+      Lisää kaveriksi
+    </button>
+  );
+}
+
 const UserPage: NextPage = () => {
   const router = useRouter();
   const { userId } = router.query;
@@ -57,7 +74,10 @@ const UserPage: NextPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <Avatar user={userData} size="l" />
+      <div className="flex flex-row items-end justify-between">
+        <Avatar user={userData} size="l" />
+        <AddFriendButton userId={userData.id} />
+      </div>
       <h1>{userData.name}</h1>
       <div>
         {userData.location && <span>{userData.location}</span>}
