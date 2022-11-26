@@ -1,5 +1,5 @@
 import Avatar from "./Avatar";
-import { Dialog, Menu } from "@headlessui/react";
+import { Dialog, Menu, Popover } from "@headlessui/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -93,7 +93,7 @@ function Topbar() {
   return (
     <div className="sticky top-0 z-10 flex h-16 items-center justify-between gap-5 bg-base-300 bg-opacity-50 py-2 px-5 backdrop-blur">
       <div className="flex-none lg:hidden">
-        <label htmlFor="my-drawer" className="btn-ghost btn-square btn">
+        <label htmlFor="my-drawer" className="btn btn-ghost btn-square">
           <IoReorderThreeOutline size={32} />
         </label>
       </div>
@@ -102,42 +102,37 @@ function Topbar() {
       </div>
 
       {session.data ? (
-        <div className="dropdown dropdown-end h-12">
-          <Menu>
-            <Menu.Button>
-              <Avatar user={session.data.user} size="s" />
-            </Menu.Button>
-            <Menu.Items className="dropdown-content menu rounded-box w-52 border border-base-content border-opacity-25 bg-base-100 p-2 shadow-xl">
-              <Link href={`/users/${session.data.user?.id}`} passHref>
-                <Menu.Item as="li">
-                  {({ active }) => (
-                    <a
-                      className={`${
-                        active && "bg-primary-focus text-primary-content"
-                      }`}
-                    >
-                      Profiili
-                    </a>
-                  )}
-                </Menu.Item>
-              </Link>
-
-              <Link href="/api/auth/signout" passHref>
-                <Menu.Item as="li">
-                  {({ active }) => (
-                    <a
-                      className={`${
-                        active && "bg-primary-focus text-primary-content"
-                      }`}
-                    >
-                      Kirjaudu ulos
-                    </a>
-                  )}
-                </Menu.Item>
-              </Link>
-            </Menu.Items>
-          </Menu>
-        </div>
+        <Menu as="div" className="dropdown-end dropdown h-12">
+          <Menu.Button>
+            <Avatar user={session.data.user} size="s" />
+          </Menu.Button>
+          <Menu.Items className="dropdown-content rounded-box flex w-52 flex-col border border-medium bg-base-100 shadow-xl">
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  href={`/users/${session.data.user?.id}`}
+                  className={`btn no-animation w-full justify-start rounded-t-2xl rounded-b-none ${
+                    active ? "btn-primary" : ""
+                  } `}
+                >
+                  Profiili
+                </Link>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({ active }) => (
+                <Link
+                  href="/api/auth/signout"
+                  className={`btn no-animation w-full justify-start rounded-b-2xl rounded-t-none ${
+                    active ? "btn-primary" : ""
+                  }`}
+                >
+                  Kirjaudu ulos
+                </Link>
+              )}
+            </Menu.Item>
+          </Menu.Items>
+        </Menu>
       ) : (
         <Link href="/api/auth/signin" className="btn">
           Kirjaudu
