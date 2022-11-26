@@ -1,5 +1,5 @@
 import Avatar from "./Avatar";
-import { Dialog, Menu, Popover } from "@headlessui/react";
+import { Dialog, Menu } from "@headlessui/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
