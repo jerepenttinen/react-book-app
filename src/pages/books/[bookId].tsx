@@ -234,6 +234,17 @@ const BookPage: NextPage = () => {
 
   const [descriptionHasOverflow, setDescriptionHasOverflow] = useState(false);
 
+  const measureDescription = useCallback(
+    (description: HTMLDivElement | null) => {
+      setDescriptionHasOverflow(
+        !!description
+          ? description?.scrollHeight > description?.clientHeight
+          : false,
+      );
+    },
+    [],
+  );
+
   const {
     data: bookData,
     isLoading,
@@ -247,17 +258,6 @@ const BookPage: NextPage = () => {
       enabled: !!bookId,
       retry: 0,
     },
-  );
-
-  const measureDescription = useCallback(
-    (description: HTMLDivElement | null) => {
-      setDescriptionHasOverflow(
-        !!description
-          ? description?.scrollHeight > description?.clientHeight
-          : false,
-      );
-    },
-    [],
   );
 
   if (
