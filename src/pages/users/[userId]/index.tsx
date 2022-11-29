@@ -43,12 +43,11 @@ function LibraryPreview(props: { userId: string }) {
 
       <div className="flex flex-row gap-4">
         {previewData?.map((savedBook) => (
-          <Link
+          <BookCover
             key={"preview" + savedBook.id}
-            href={`/books/${savedBook.bookId}`}
-          >
-            <BookCover book={savedBook.book} size="s" />
-          </Link>
+            book={savedBook.book}
+            size="s"
+          />
         ))}
       </div>
     </div>
@@ -74,9 +73,11 @@ function FavoriteBooks(props: { userId: string }) {
           <h3>Lempi kirjat</h3>
           <div className="flex flex-row gap-4">
             {favoriteData?.map((review) => (
-              <Link key={"review" + review.id} href={`/books/${review.bookId}`}>
-                <BookCover book={review.book} size="s" />
-              </Link>
+              <BookCover
+                key={"favorite" + review.id}
+                book={review.book}
+                size="s"
+              />
             ))}
           </div>
         </section>
