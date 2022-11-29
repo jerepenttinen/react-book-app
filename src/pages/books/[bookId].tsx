@@ -8,14 +8,14 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
 interface ReviewSectionProps {
   bookId: string;
 }
-function ReviewSection(props: ReviewSectionProps) {
+function ReviewSection(this: any, props: ReviewSectionProps) {
   const trpcContext = trpc.useContext();
   const {
     data: reviewData,
@@ -40,22 +40,93 @@ function ReviewSection(props: ReviewSectionProps) {
 
   return (
     <section className="flex flex-col">
-      <span className="font-bold">Arvostelut</span>
-      <button
-        type="button"
-        className="btn-primary btn"
-        onClick={() =>
-          createReview.mutate({
-            bookId: props.bookId,
-            score: 9,
-            content: "TESTI ARVOSTELU, LUOTU PAINAMALLA TESTINAPPIA!",
-          })
-        }
-      >
-        Lisää testi arvostelu
-      </button>
+      <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
+      <form id="myform" onSubmit={(e: FormEvent<HTMLFormElement>) => {
+                e.preventDefault();
+                const arvostelu = (document.getElementById("arvosteluTeksti") as HTMLInputElement).value;
+                const tahtiLista = (document.getElementsByName("rating-10") as NodeListOf<HTMLElement>);
+                let tahtia = "10";
+                tahtiLista.forEach(tahti => {
+                  if((tahti as HTMLInputElement).checked) {
+                    tahtia = (tahti as HTMLInputElement).value;
+                  }
+                });
+                createReview.mutate({
+                  bookId: props.bookId,
+                  score: parseInt(tahtia),
+                  content: arvostelu,
+                });
+            }}>
+        <div className="rating rating-lg rating-half my-0">
+          <input type="radio" name="rating-10" className="rating-hidden" />
+          <input
+            value = "1"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star-2 bg-secondary"
+          />
+          <input
+            value="2"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star-2 bg-secondary"
+          />
+          <input
+            value="3"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star-2 bg-secondary"
+          />
+          <input
+            value="4"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star-2 bg-secondary"
+          />
+          <input
+            value="5"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star-2 bg-secondary"
+          />
+          <input
+            value="6"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star-2 bg-secondary"
+          />
+          <input
+            value="7"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star-2 bg-secondary"
+          />
+          <input
+            value="8"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star-2 bg-secondary"
+          />
+          <input
+            value="9"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star-2 bg-secondary"
+          />
+          <input
+            value="10"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star-2 bg-secondary"
+          />
+        </div>
+        <textarea name="" id="arvosteluTeksti" defaultValue={"Kerro meille Zorbas"}></textarea>
+        <button className="btn-primary btn" type="submit">Lisää arvostelu</button>
+      </form>
+      <div className="divider"></div>
+      <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
-        <div key={review.id}>{review.content}</div>
+        <div key={review.id}>{review.content} <BookScore bookId={props.bookId} /></div>
       ))}
     </section>
   );
