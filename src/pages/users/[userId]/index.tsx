@@ -4,7 +4,7 @@ import Avatar from "~/components/Avatar";
 import { trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
-import { formatDate } from "../library";
+import { formatDate } from "./library";
 
 function AddFriendButton(props: { userId: string }) {
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
@@ -20,6 +20,71 @@ function AddFriendButton(props: { userId: string }) {
     >
       Lisää kaveriksi
     </button>
+  );
+}
+
+function LibraryPreview(props: { userId: string }) {
+  const { data: previewData } = trpc.books.getLibraryPreviewBooks.useQuery(
+    {
+      userId: props.userId,
+      bookCount: 8,
+    },
+    {
+      enabled: !!props.userId,
+      retry: 0,
+    },
+  );
+
+  return (
+    <div>
+      <Link href={`/users/${props.userId}/library`}>
+        <h3>Kirjasto</h3>
+      </Link>
+
+      <div className="flex flex-row gap-4">
+        {previewData?.map((savedBook) => (
+          <BookCover
+            key={"preview" + savedBook.id}
+            book={savedBook.book}
+            size="s"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FavoriteBooks(props: { userId: string }) {
+  const { data: favoriteData } = trpc.books.getFavoriteBooks.useQuery(
+    {
+      userId: props.userId,
+      bookCount: 8,
+    },
+    {
+      enabled: !!props.userId,
+      retry: 0,
+    },
+  );
+
+  return (
+    <>
+      {!!favoriteData ? (
+        <section>
+          <h3>Lempi kirjat</h3>
+          <div className="flex flex-row gap-4">
+            {favoriteData?.map((review) => (
+              <BookCover
+                key={"favorite" + review.id}
+                book={review.book}
+                size="s"
+              />
+            ))}
+          </div>
+        </section>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 
@@ -85,23 +150,21 @@ const UserPage: NextPage = () => {
           <span>Liittyi {formatDate(userData.createdAt)}</span>
         )}
       </div>
-      <h3>Lempikirjat</h3>
-      <h3>Kirjasto</h3>
+
+      <FavoriteBooks userId={userId} />
+
+      <LibraryPreview userId={userId} />
+
       <h3>Parhaillaan lukemassa</h3>
       {readingBooksData && readingBooksData.length > 0 && (
         <>
           {readingBooksData.map((savedBook) => (
             <div key={savedBook.id} className="flex h-min flex-row gap-4 px-4">
-              <Link
-                href={`/books/${savedBook.bookId}`}
-                className="h-24 w-16 p-0"
-              >
-                <BookCover
-                  book={savedBook.book}
-                  size="s"
-                  key={savedBook.id + "sidecover"}
-                />
-              </Link>
+              <BookCover
+                book={savedBook.book}
+                size="s"
+                key={savedBook.id + "sidecover"}
+              />
               <div className="flex w-3/5 flex-col gap-1 p-0">
                 <Link href={`/books/${savedBook.bookId}`} className="font-bold">
                   {savedBook.book.name}

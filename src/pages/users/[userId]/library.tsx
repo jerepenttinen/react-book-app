@@ -10,11 +10,13 @@ import {
 import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import { IoCloseOutline } from "react-icons/io5";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Dialog } from "@headlessui/react";
 import { type Book } from "@prisma/client";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
@@ -29,28 +31,54 @@ const shelves = new Map<string, string>([
   ["read", "Luettu"],
 ]);
 
+function useBookDialog(
+  book: Book | undefined = undefined,
+): [Book | undefined, (book: Book) => void, boolean, () => void] {
+  const [targetBook, setTargetBook] = useState<Book | undefined>(book);
+
+  return [
+    targetBook,
+    (book: Book) => setTargetBook(book),
+    targetBook !== undefined, // isOpen
+    () => setTargetBook(undefined), // close
+  ];
+}
+
 const LibraryPage: NextPage = () => {
-  const trpcContext = trpc.useContext();
-  const { data } = trpc.books.getSavedBooks.useQuery();
+  const router = useRouter();
+  const { userId } = router.query;
+  const session = useSession();
+
+  const [isMyLibrary, setIsMyLibrary] = useState(
+    userId === session.data?.user?.id,
+  );
+  useEffect(() => {
+    setIsMyLibrary(userId === session.data?.user?.id);
+  }, [session.data?.user?.id, userId]);
+
+  const { data } = trpc.books.getSavedBooks.useQuery(
+    {
+      userId: userId as string,
+    },
+    {
+      enabled: !!userId,
+    },
+  );
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const tableData = data ?? ([] as RowType[]);
 
-  const [targetBook, setTargetBook] = useState<Book | undefined>();
-  const [isOpen, setIsOpen] = useState(false);
-
+  const trpcContext = trpc.useContext();
   const updateSavedBook = trpc.books.updateSavedBook.useMutation();
+
+  const [book, setBook, modalIsOpen, closeModal] = useBookDialog();
 
   const columns = useMemo(
     () => [
       columnHelper.accessor("book", {
         header: () => <span>Kansi</span>,
-        cell: (cell) => (
-          <Link href={`/books/${cell.row.original.bookId}`}>
-            <BookCover book={cell.getValue()} size="s" />
-          </Link>
-        ),
+        cell: (cell) => <BookCover book={cell.getValue()} size="s" />,
         enableSorting: false,
       }),
       columnHelper.accessor("book.name", {
@@ -81,7 +109,7 @@ const LibraryPage: NextPage = () => {
           return (
             <button
               type="button"
-              className="btn-ghost btn-sm btn inline-flex w-max gap-px px-0"
+              className="btn-ghost no-animation btn-sm btn inline-flex w-max gap-px px-0"
             >
               {starPercentages.map((perc, i) => (
                 <div key={i + "star"} className="relative h-4 w-4">
@@ -113,22 +141,29 @@ const LibraryPage: NextPage = () => {
       }),
       columnHelper.accessor("book.id", {
         header: () => <span></span>,
-        cell: (cell) => (
-          <button
-            type="button"
-            className="btn-sm btn-circle btn"
-            onClick={() => {
-              setTargetBook(cell.row.original.book);
-              setIsOpen(true);
-            }}
-          >
-            <IoCloseOutline className="h-5 w-5" />
-          </button>
-        ),
+        cell: (cell) => {
+          return (
+            <>
+              {isMyLibrary ? (
+                <button
+                  type="button"
+                  className="btn-sm btn-circle btn"
+                  onClick={() => {
+                    setBook(cell.row.original.book);
+                  }}
+                >
+                  <IoCloseOutline className="h-5 w-5" />
+                </button>
+              ) : (
+                <div></div>
+              )}
+            </>
+          );
+        },
         enableSorting: false,
       }),
     ],
-    [],
+    [setBook, isMyLibrary],
   );
 
   const table = useReactTable({
@@ -185,13 +220,13 @@ const LibraryPage: NextPage = () => {
       <Dialog
         as="div"
         className="modal modal-open"
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
+        open={modalIsOpen}
+        onClose={closeModal}
       >
         <Dialog.Panel className="prose modal-box border border-base-content border-opacity-20">
           <Dialog.Title as="h3">Poista kirja</Dialog.Title>
           <p>
-            Haluatko varmasti poistaa kirjan {targetBook?.name + " "}
+            Haluatko varmasti poistaa kirjan {book?.name + " "}
             kirjastostasi? Tätä toimintoa ei voi peruuttaa.
           </p>
 
@@ -201,25 +236,25 @@ const LibraryPage: NextPage = () => {
               onClick={async () => {
                 await updateSavedBook.mutateAsync(
                   {
-                    bookId: targetBook?.id ?? "",
+                    bookId: book?.id ?? "",
                     shelf: "none",
                   },
                   {
                     onSuccess: () => {
                       trpcContext.books.getSavedBooks.setData(
-                        data?.filter((book) => book.bookId !== targetBook?.id),
+                        data?.filter((b) => b.bookId !== book?.id),
                       );
                       trpcContext.books.getReadingBooks.invalidate();
                     },
                   },
                 );
 
-                setIsOpen(false);
+                closeModal();
               }}
             >
               Poista
             </button>
-            <button className="btn-error btn" onClick={() => setIsOpen(false)}>
+            <button className="btn-error btn" onClick={closeModal}>
               Peruuta
             </button>
           </div>
