@@ -12,6 +12,11 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
+import Avatar from "~/components/Avatar";
+import Link from "next/link";
+
+import { Dialog, Menu } from "@headlessui/react";
+
 interface ReviewSectionProps {
   bookId: string;
 }
@@ -42,25 +47,25 @@ function ReviewSection(this: any, props: ReviewSectionProps) {
     <section className="flex flex-col">
       <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
       <form id="myform" onSubmit={(e: FormEvent<HTMLFormElement>) => {
-                e.preventDefault();
-                const arvostelu = (document.getElementById("arvosteluTeksti") as HTMLInputElement).value;
-                const tahtiLista = (document.getElementsByName("rating-10") as NodeListOf<HTMLElement>);
-                let tahtia = "10";
-                tahtiLista.forEach(tahti => {
-                  if((tahti as HTMLInputElement).checked) {
-                    tahtia = (tahti as HTMLInputElement).value;
-                  }
-                });
-                createReview.mutate({
-                  bookId: props.bookId,
-                  score: parseInt(tahtia),
-                  content: arvostelu,
-                });
-            }}>
+        e.preventDefault();
+        const arvostelu = (document.getElementById("arvosteluTeksti") as HTMLInputElement).value;
+        const tahtiLista = (document.getElementsByName("rating-10") as NodeListOf<HTMLElement>);
+        let tahtia = "10";
+        tahtiLista.forEach(tahti => {
+          if ((tahti as HTMLInputElement).checked) {
+            tahtia = (tahti as HTMLInputElement).value;
+          }
+        });
+        createReview.mutate({
+          bookId: props.bookId,
+          score: parseInt(tahtia),
+          content: arvostelu,
+        });
+      }}>
         <div className="rating rating-lg rating-half my-0">
           <input type="radio" name="rating-10" className="rating-hidden" />
           <input
-            value = "1"
+            value="1"
             type="radio"
             name="rating-10"
             className="mask mask-half-1 mask-star-2 bg-secondary"
@@ -126,7 +131,25 @@ function ReviewSection(this: any, props: ReviewSectionProps) {
       <div className="divider"></div>
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
-        <div key={review.id}>{review.content} <BookScore bookId={props.bookId} /></div>
+        <div key={review.id}>{review.content} <ReviewScore reviewScore={review.score} /> By: {review.user.name}
+          <Menu as="div" className="dropdown dropdown-end h-12">
+            <Menu.Button>
+              <Avatar user={review.user} size="s" />
+            </Menu.Button>
+            <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
+              <Menu.Item>
+                {({ active }) => (
+                  <Link
+                    href={`/users/${review.user?.id}`}
+                    className={`no-animation btn w-full justify-start rounded-none ${active ? "btn-primary" : ""
+                      } `}
+                  >
+                    Profiili
+                  </Link>
+                )}
+              </Menu.Item>
+            </Menu.Items>
+          </Menu></div>
       ))}
     </section>
   );
@@ -293,6 +316,41 @@ function BookScore({ bookId }: { bookId: string }) {
         ))}
       </div>
       <h1 className="my-0" title={`${starData?._count.score ?? 0} arvostelua`}>
+        {score.toFixed(2)}
+      </h1>
+    </div>
+  );
+}
+
+function ReviewScore({ reviewScore }: { reviewScore: number }) {
+  const score = reviewScore / 2;
+  const starPercentages = [0, 0, 0, 0, 0];
+
+  for (let i = 0; i < score; i++) {
+    starPercentages[i] = 1;
+  }
+
+  if (score < 5) {
+    // Set last star to the fraction of the score
+    starPercentages[Math.floor(score)] = score % 1;
+  }
+
+  return (
+    <div className="my-0 inline-flex gap-2">
+      <div className="inline-flex gap-px">
+        {starPercentages.map((perc, i) => (
+          <div key={i + "star"} className="relative h-10 w-10">
+            <div
+              style={{ width: `${2.5 * perc}rem` }}
+              className="absolute h-10 overflow-hidden"
+            >
+              <div className="mask mask-star-2 h-10 w-10 bg-secondary"></div>
+            </div>
+            <div className="mask mask-star-2 absolute h-10 w-10 bg-secondary/20"></div>
+          </div>
+        ))}
+      </div>
+      <h1 className="my-0">
         {score.toFixed(2)}
       </h1>
     </div>
