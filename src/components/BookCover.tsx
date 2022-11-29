@@ -64,7 +64,7 @@ function Wrapper({ children, condition, as }: WrapperProps) {
 }
 
 function BookCover({ book, size, compact, withoutLink }: BookCoverProps) {
-  const s = sizes[size];
+  const s = structuredClone(sizes[size]);
 
   if (compact) {
     s.height = s.width;
