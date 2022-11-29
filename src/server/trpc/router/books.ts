@@ -129,12 +129,17 @@ export const booksRouter = router({
         });
       }
     }),
-  getReadingBooks: protectedProcedure
-    .input(z.optional(z.object({ userId: z.optional(z.string()) })))
+  getReadingBooks: publicProcedure
+    .input(z.object({ userId: z.string().optional() }).optional())
     .query(({ input, ctx }) => {
+      const userId = input?.userId ? input.userId : ctx.session?.user?.id;
+      if (userId == undefined) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+
       return ctx.prisma.savedBook.findMany({
         where: {
-          userId: input && input.userId ? input.userId : ctx.session.user.id,
+          userId,
           shelf: "reading",
         },
         include: {
@@ -159,7 +164,7 @@ export const booksRouter = router({
         },
       });
     }),
-  getSavedBooks: protectedProcedure
+  getSavedBooks: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.prisma.savedBook.findMany({
