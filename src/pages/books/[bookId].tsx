@@ -8,7 +8,7 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
@@ -206,7 +206,6 @@ function BookScore({ bookId }: { bookId: string }) {
     starPercentages[Math.floor(score)] = score % 1;
   }
 
-  console.log(starData);
   return (
     <div className="my-0 inline-flex gap-2">
       <div className="inline-flex gap-px">
@@ -233,7 +232,6 @@ const BookPage: NextPage = () => {
   const router = useRouter();
   const { bookId } = router.query;
 
-  const descriptionRef = useRef<HTMLDivElement>(null);
   const [descriptionHasOverflow, setDescriptionHasOverflow] = useState(false);
 
   const {
@@ -251,14 +249,16 @@ const BookPage: NextPage = () => {
     },
   );
 
-  useEffect(() => {
-    setDescriptionHasOverflow(
-      !!descriptionRef.current
-        ? descriptionRef.current.clientHeight <=
-            descriptionRef.current.scrollHeight
-        : false,
-    );
-  }, [descriptionRef]);
+  const measureDescription = useCallback(
+    (description: HTMLDivElement | null) => {
+      setDescriptionHasOverflow(
+        !!description
+          ? description?.scrollHeight > description?.clientHeight
+          : false,
+      );
+    },
+    [],
+  );
 
   if (
     typeof bookId !== "string" ||
@@ -353,15 +353,17 @@ const BookPage: NextPage = () => {
           </div>
           {volume.description && (
             <div className="flex flex-shrink flex-col">
-              {descriptionHasOverflow && (
+              {descriptionHasOverflow ? (
                 <input
                   type="checkbox"
                   className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
                 />
+              ) : (
+                <></>
               )}
               <div
-                ref={descriptionRef}
-                className="order-1 overflow-y-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:contents"
+                ref={measureDescription}
+                className="order-1 overflow-y-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:block"
               >
                 {parse(volume.description)}
               </div>
