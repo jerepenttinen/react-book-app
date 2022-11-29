@@ -4,7 +4,7 @@ import Avatar from "~/components/Avatar";
 import { trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
-import { formatDate } from "../library";
+import { formatDate } from "./library";
 
 function AddFriendButton(props: { userId: string }) {
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
@@ -86,7 +86,9 @@ const UserPage: NextPage = () => {
         )}
       </div>
       <h3>Lempikirjat</h3>
-      <h3>Kirjasto</h3>
+      <Link href={`/users/${userId}/library`}>
+        <h3>Kirjasto</h3>
+      </Link>
       <h3>Parhaillaan lukemassa</h3>
       {readingBooksData && readingBooksData.length > 0 && (
         <>

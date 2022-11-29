@@ -89,25 +89,31 @@ function Sidebar() {
             text="Koti"
           />
         </li>
-        <li>
-          <IconLink
-            href="/library"
-            icon={<IoLibraryOutline />}
-            hoverIcon={<IoLibrary />}
-            text="Kirjasto"
-          />
-        </li>
-        <li>
-          <IconLink
-            href="/friends"
-            icon={<IoPeopleOutline />}
-            hoverIcon={<IoPeople />}
-            text="Kaverit"
-          />
-        </li>
-        <li>
-          <NotificationsLink />
-        </li>
+        {!!session.data?.user ? (
+          <>
+            <li>
+              <IconLink
+                href={`/users/${session.data?.user?.id}/library`}
+                icon={<IoLibraryOutline />}
+                hoverIcon={<IoLibrary />}
+                text="Kirjasto"
+              />
+            </li>
+            <li>
+              <IconLink
+                href="/friends"
+                icon={<IoPeopleOutline />}
+                hoverIcon={<IoPeople />}
+                text="Kaverit"
+              />
+            </li>
+            <li>
+              <NotificationsLink />
+            </li>
+          </>
+        ) : (
+          <></>
+        )}
         <div className="visible mx-4 mt-4 mb-2 lg:hidden">
           <Searchbar />
         </div>

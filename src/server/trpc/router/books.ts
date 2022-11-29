@@ -159,27 +159,29 @@ export const booksRouter = router({
         },
       });
     }),
-  getSavedBooks: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.savedBook.findMany({
-      where: {
-        userId: ctx.session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        book: {
-          include: {
-            reviews: {
-              where: {
-                userId: ctx.session.user.id,
+  getSavedBooks: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.savedBook.findMany({
+        where: {
+          userId: input.userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          book: {
+            include: {
+              reviews: {
+                where: {
+                  userId: input.userId,
+                },
               },
             },
           },
         },
-      },
-    });
-  }),
+      });
+    }),
 });
 
 async function loadBookToDatabase(ctx: Context, bookId: string) {
