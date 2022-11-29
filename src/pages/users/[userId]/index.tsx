@@ -5,6 +5,7 @@ import { trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
 import { formatDate } from "./library";
+import { IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
 
 function AddFriendButton(props: { userId: string }) {
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
@@ -36,9 +37,9 @@ function LibraryPreview(props: { userId: string }) {
   );
 
   return (
-    <div>
+    <section className="flex flex-col gap-4">
       <Link href={`/users/${props.userId}/library`}>
-        <h3>Kirjasto</h3>
+        <span className="font-bold">Kirjasto</span>
       </Link>
 
       <div className="flex flex-row gap-4">
@@ -50,7 +51,7 @@ function LibraryPreview(props: { userId: string }) {
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -69,8 +70,8 @@ function FavoriteBooks(props: { userId: string }) {
   return (
     <>
       {!!favoriteData ? (
-        <section>
-          <h3>Lempi kirjat</h3>
+        <section className="flex flex-col gap-4">
+          <span className="text-lg font-bold">Lempi kirjat</span>
           <div className="flex flex-row gap-4">
             {favoriteData?.map((review) => (
               <BookCover
@@ -83,6 +84,46 @@ function FavoriteBooks(props: { userId: string }) {
         </section>
       ) : (
         <></>
+      )}
+    </>
+  );
+}
+
+function ReadingBooks({ userId }: { userId: string }) {
+  const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
+    {
+      userId: userId as string,
+    },
+    {
+      retry: 0,
+      enabled: !!userId,
+    },
+  );
+
+  return (
+    <>
+      {readingBooksData && readingBooksData.length > 0 && (
+        <section className="flex flex-col gap-8">
+          <span className="font-bold">Parhaillaan lukemassa</span>
+          {readingBooksData.map((savedBook) => (
+            <div key={savedBook.id} className="flex h-min flex-row gap-4">
+              <BookCover
+                book={savedBook.book}
+                size="s"
+                key={savedBook.id + "sidecover"}
+              />
+              <div className="flex w-3/5 flex-col gap-1 p-0">
+                <Link href={`/books/${savedBook.bookId}`} className="font-bold">
+                  {savedBook.book.name}
+                </Link>
+                <span>
+                  {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+                </span>
+                <span>Sivulla X/Y (Z%)</span>
+              </div>
+            </div>
+          ))}
+        </section>
       )}
     </>
   );
@@ -104,16 +145,6 @@ const UserPage: NextPage = () => {
     {
       enabled: !!userId,
       retry: 0,
-    },
-  );
-
-  const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
-    {
-      userId: userId as string,
-    },
-    {
-      retry: 0,
-      enabled: !!userId,
     },
   );
 
@@ -139,46 +170,44 @@ const UserPage: NextPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-row items-end justify-between">
+      <section className="flex flex-row items-end justify-between">
         <Avatar user={userData} size="l" />
         <AddFriendButton userId={userData.id} />
-      </div>
-      <h1>{userData.name}</h1>
-      <div>
-        {userData.location && <span>{userData.location}</span>}
-        {userData.createdAt && (
-          <span>Liittyi {formatDate(userData.createdAt)}</span>
-        )}
-      </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <span className="text-4xl font-extrabold">{userData.name}</span>
+
+        {userData.biography ? <span>{userData.biography}</span> : <></>}
+
+        <div className="flex flex-row gap-4 text-medium">
+          {userData.location ? (
+            <div className="inline-flex gap-1">
+              <IoLocationOutline size={24} />
+              <span>{userData.location}</span>
+            </div>
+          ) : (
+            <></>
+          )}
+
+          {userData.createdAt ? (
+            <div className="inline-flex gap-1">
+              <IoCalendarOutline size={24} />
+              <span>Liittyi {formatDate(userData.createdAt)}</span>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
+      </section>
 
       <FavoriteBooks userId={userId} />
 
       <LibraryPreview userId={userId} />
 
-      <h3>Parhaillaan lukemassa</h3>
-      {readingBooksData && readingBooksData.length > 0 && (
-        <>
-          {readingBooksData.map((savedBook) => (
-            <div key={savedBook.id} className="flex h-min flex-row gap-4 px-4">
-              <BookCover
-                book={savedBook.book}
-                size="s"
-                key={savedBook.id + "sidecover"}
-              />
-              <div className="flex w-3/5 flex-col gap-1 p-0">
-                <Link href={`/books/${savedBook.bookId}`} className="font-bold">
-                  {savedBook.book.name}
-                </Link>
-                <span>
-                  {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
-                </span>
-                <span>Sivulla X/Y (Z%)</span>
-              </div>
-            </div>
-          ))}
-        </>
-      )}
-      <h3>Päivitykset</h3>
+      <ReadingBooks userId={userId} />
+
+      {/* <h3>Päivitykset</h3> */}
     </div>
   );
 };

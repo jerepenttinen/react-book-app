@@ -93,7 +93,7 @@ function Topbar() {
   return (
     <div className="sticky top-0 z-10 flex h-16 items-center justify-between gap-5 bg-base-300 bg-opacity-50 py-2 px-5 backdrop-blur">
       <div className="flex-none lg:hidden">
-        <label htmlFor="my-drawer" className="btn btn-ghost btn-square">
+        <label htmlFor="my-drawer" className="btn-ghost btn-square btn">
           <IoReorderThreeOutline size={32} />
         </label>
       </div>
@@ -102,16 +102,16 @@ function Topbar() {
       </div>
 
       {session.data ? (
-        <Menu as="div" className="dropdown-end dropdown h-12">
+        <Menu as="div" className="dropdown dropdown-end h-12">
           <Menu.Button>
             <Avatar user={session.data.user} size="s" />
           </Menu.Button>
-          <Menu.Items className="dropdown-content rounded-box flex w-52 flex-col border border-medium bg-base-100 shadow-xl">
+          <Menu.Items className="dropdown-content rounded-box flex w-52 flex-col border border-medium bg-base-100 py-4 shadow-xl">
             <Menu.Item>
               {({ active }) => (
                 <Link
                   href={`/users/${session.data.user?.id}`}
-                  className={`btn no-animation w-full justify-start rounded-t-2xl rounded-b-none ${
+                  className={`no-animation btn w-full justify-start rounded-none ${
                     active ? "btn-primary" : ""
                   } `}
                 >
@@ -123,7 +123,7 @@ function Topbar() {
               {({ active }) => (
                 <Link
                   href="/api/auth/signout"
-                  className={`btn no-animation w-full justify-start rounded-b-2xl rounded-t-none ${
+                  className={`no-animation btn w-full justify-start rounded-none ${
                     active ? "btn-primary" : ""
                   }`}
                 >
