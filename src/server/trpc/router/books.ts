@@ -187,6 +187,43 @@ export const booksRouter = router({
         },
       });
     }),
+  getLibraryPreviewBooks: publicProcedure
+    .input(z.object({ userId: z.string(), bookCount: z.number().min(0) }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.savedBook.findMany({
+        where: {
+          userId: input.userId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: input.bookCount,
+        include: {
+          book: true,
+        },
+      });
+    }),
+  getFavoriteBooks: publicProcedure
+    .input(z.object({ userId: z.string(), bookCount: z.number().min(0) }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.review.findMany({
+        where: {
+          userId: input.userId,
+        },
+        orderBy: [
+          {
+            score: "desc",
+          },
+          {
+            createdAt: "desc",
+          },
+        ],
+        take: input.bookCount,
+        include: {
+          book: true,
+        },
+      });
+    }),
 });
 
 async function loadBookToDatabase(ctx: Context, bookId: string) {

@@ -23,6 +23,70 @@ function AddFriendButton(props: { userId: string }) {
   );
 }
 
+function LibraryPreview(props: { userId: string }) {
+  const { data: previewData } = trpc.books.getLibraryPreviewBooks.useQuery(
+    {
+      userId: props.userId,
+      bookCount: 8,
+    },
+    {
+      enabled: !!props.userId,
+      retry: 0,
+    },
+  );
+
+  return (
+    <div>
+      <Link href={`/users/${props.userId}/library`}>
+        <h3>Kirjasto</h3>
+      </Link>
+
+      <div className="flex flex-row gap-4">
+        {previewData?.map((savedBook) => (
+          <Link
+            key={"preview" + savedBook.id}
+            href={`/books/${savedBook.bookId}`}
+          >
+            <BookCover book={savedBook.book} size="s" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FavoriteBooks(props: { userId: string }) {
+  const { data: favoriteData } = trpc.books.getFavoriteBooks.useQuery(
+    {
+      userId: props.userId,
+      bookCount: 8,
+    },
+    {
+      enabled: !!props.userId,
+      retry: 0,
+    },
+  );
+
+  return (
+    <>
+      {!!favoriteData ? (
+        <section>
+          <h3>Lempi kirjat</h3>
+          <div className="flex flex-row gap-4">
+            {favoriteData?.map((review) => (
+              <Link key={"review" + review.id} href={`/books/${review.bookId}`}>
+                <BookCover book={review.book} size="s" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <></>
+      )}
+    </>
+  );
+}
+
 const UserPage: NextPage = () => {
   const router = useRouter();
   const { userId } = router.query;
@@ -85,10 +149,11 @@ const UserPage: NextPage = () => {
           <span>Liittyi {formatDate(userData.createdAt)}</span>
         )}
       </div>
-      <h3>Lempikirjat</h3>
-      <Link href={`/users/${userId}/library`}>
-        <h3>Kirjasto</h3>
-      </Link>
+
+      <FavoriteBooks userId={userId} />
+
+      <LibraryPreview userId={userId} />
+
       <h3>Parhaillaan lukemassa</h3>
       {readingBooksData && readingBooksData.length > 0 && (
         <>
