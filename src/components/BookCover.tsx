@@ -2,11 +2,14 @@ import { type BookData } from "~/server/googlebooks/book-types";
 import Image from "next/image";
 import { ImFileEmpty } from "react-icons/im";
 import { type Book } from "@prisma/client";
+import Link from "next/link";
+import React from "react";
 
 interface BookCoverProps {
   book: BookData | Book;
   size: "s" | "l";
   compact?: boolean;
+  withoutLink?: boolean;
 }
 
 const sizes = {
@@ -29,6 +32,7 @@ function isBookType(book: BookData | Book): book is Book {
 }
 
 interface CommonBook {
+  id: string;
   thumbnail: string | undefined | null;
   title: string | undefined | null;
 }
@@ -36,18 +40,30 @@ interface CommonBook {
 function getCommonBook(book: BookData | Book): CommonBook {
   if (isBookType(book)) {
     return {
+      id: book.id,
       thumbnail: book.thumbnailUrl,
       title: book.name,
     };
   } else {
     return {
+      id: book.id,
       thumbnail: book.volumeInfo.imageLinks?.thumbnail,
       title: book.volumeInfo.title,
     };
   }
 }
 
-function BookCover({ book, size, compact }: BookCoverProps) {
+interface WrapperProps {
+  children?: React.ReactNode;
+  condition: boolean;
+  as: (children?: React.ReactNode) => React.ReactNode;
+}
+
+function Wrapper({ children, condition, as }: WrapperProps) {
+  return <>{condition ? as(children) : children}</>;
+}
+
+function BookCover({ book, size, compact, withoutLink }: BookCoverProps) {
   const s = sizes[size];
 
   if (compact) {
@@ -59,24 +75,38 @@ function BookCover({ book, size, compact }: BookCoverProps) {
   const common = getCommonBook(book);
 
   return (
-    <>
-      {common.thumbnail ? (
-        <Image
-          src={common.thumbnail}
-          alt={`Kirjan ${common.title} kansikuva`}
-          width={s.width}
-          height={s.height}
-          className="my-0 h-min rounded"
-          priority
-        />
-      ) : (
-        <div
-          className={`flex ${s.tw} ${s.th} justify-center rounded bg-neutral`}
-        >
-          <ImFileEmpty className="my-auto" />
+    <Wrapper
+      condition={compact ?? false}
+      as={(children) => (
+        <div className={`overflow-clip ${s.tw} ${s.th} rounded`}>
+          {children}
         </div>
       )}
-    </>
+    >
+      <Wrapper
+        condition={!withoutLink}
+        as={(children) => <Link href={`/books/${common.id}`}>{children}</Link>}
+      >
+        {common.thumbnail ? (
+          <Image
+            src={common.thumbnail}
+            alt={`Kirjan ${common.title} kansikuva`}
+            width={s.width}
+            height={s.height}
+            className="my-0 h-min rounded"
+            title={common.title ?? ""}
+            priority
+          />
+        ) : (
+          <div
+            className={`flex ${s.tw} ${s.th} items-center justify-center rounded bg-base-content text-base-300`}
+            title={common.title ?? ""}
+          >
+            <ImFileEmpty />
+          </div>
+        )}
+      </Wrapper>
+    </Wrapper>
   );
 }
 

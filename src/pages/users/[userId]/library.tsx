@@ -78,11 +78,7 @@ const LibraryPage: NextPage = () => {
     () => [
       columnHelper.accessor("book", {
         header: () => <span>Kansi</span>,
-        cell: (cell) => (
-          <Link href={`/books/${cell.row.original.bookId}`}>
-            <BookCover book={cell.getValue()} size="s" />
-          </Link>
-        ),
+        cell: (cell) => <BookCover book={cell.getValue()} size="s" />,
         enableSorting: false,
       }),
       columnHelper.accessor("book.name", {

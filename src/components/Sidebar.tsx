@@ -54,7 +54,7 @@ function NotificationsLink() {
     >
       <div className="indicator">
         <span
-          className={`badge-error badge badge-xs indicator-item ${
+          className={`badge badge-error badge-xs indicator-item ${
             notificationCountData ? "" : "hidden"
           }`}
         >
@@ -124,16 +124,11 @@ function Sidebar() {
               <span className="text-lg font-bold">Parhaillaan lukemassa</span>
               {readingBooksData.map((savedBook) => (
                 <div key={savedBook.id} className="flex h-min flex-row gap-4">
-                  <Link
-                    href={`/books/${savedBook.bookId}`}
-                    className="h-24 w-16 p-0"
-                  >
-                    <BookCover
-                      book={savedBook.book}
-                      size="s"
-                      key={savedBook.id + "sidecover"}
-                    />
-                  </Link>
+                  <BookCover
+                    book={savedBook.book}
+                    size="s"
+                    key={savedBook.id + "sidecover"}
+                  />
                   <div className="flex w-3/4 flex-col gap-1 p-0">
                     <Link
                       href={`/books/${savedBook.bookId}`}

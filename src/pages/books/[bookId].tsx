@@ -286,7 +286,7 @@ const BookPage: NextPage = () => {
     <>
       <div className="flex flex-col gap-8 lg:flex-row">
         <div className="flex flex-col gap-4">
-          <BookCover book={bookData} size="l" />
+          <BookCover book={bookData} size="l" withoutLink={true} />
           <AddToLibraryButton bookId={bookId} />
         </div>
         <div className="flex w-full grow flex-col gap-4 lg:w-5/6">
