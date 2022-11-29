@@ -103,26 +103,31 @@ function ReadingBooks({ userId }: { userId: string }) {
   return (
     <>
       {readingBooksData && readingBooksData.length > 0 && (
-        <section className="flex flex-col gap-8">
+        <section className="flex flex-col gap-4">
           <span className="font-bold">Parhaillaan lukemassa</span>
-          {readingBooksData.map((savedBook) => (
-            <div key={savedBook.id} className="flex h-min flex-row gap-4">
-              <BookCover
-                book={savedBook.book}
-                size="s"
-                key={savedBook.id + "sidecover"}
-              />
-              <div className="flex w-3/5 flex-col gap-1 p-0">
-                <Link href={`/books/${savedBook.bookId}`} className="font-bold">
-                  {savedBook.book.name}
-                </Link>
-                <span>
-                  {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
-                </span>
-                <span>Sivulla X/Y (Z%)</span>
+          <div className="flex flex-col gap-8">
+            {readingBooksData.map((savedBook) => (
+              <div key={savedBook.id} className="flex h-min flex-row gap-4">
+                <BookCover
+                  book={savedBook.book}
+                  size="s"
+                  key={savedBook.id + "sidecover"}
+                />
+                <div className="flex w-3/5 flex-col gap-1 p-0">
+                  <Link
+                    href={`/books/${savedBook.bookId}`}
+                    className="font-bold"
+                  >
+                    {savedBook.book.name}
+                  </Link>
+                  <span>
+                    {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+                  </span>
+                  <span>Sivulla X/Y (Z%)</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
     </>
