@@ -198,6 +198,21 @@ export const usersRouter = router({
 
       return FriendshipStatus.SENT_REQUEST;
     }),
+  getMySentFriendRequests: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.notification.findMany({
+      where: {
+        fromUserId: ctx.session.user.id,
+      },
+      include: {
+        toUser: {
+          select: minimalUserSelect,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
 });
 
 async function acceptFriendRequest(ctx: Context, notification: Notification) {

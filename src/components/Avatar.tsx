@@ -3,16 +3,18 @@ import Image from "next/image";
 
 interface AvatarProps {
   user?: Partial<User>;
-  size: "s" | "l";
+  size: "s" | "m" | "l";
 }
 
 interface Sizes {
   s: [number, string, string, string];
+  m: [number, string, string, string];
   l: [number, string, string, string];
 }
 
 const sizes: Sizes = {
   s: [48, "w-12", "h-12", "text-lg"],
+  m: [64, "w-16", "h-16", "text-2xl"],
   l: [256, "w-64", "h-64", "text-7xl"],
 };
 
