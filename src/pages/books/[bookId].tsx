@@ -48,18 +48,11 @@ function ReviewSection(props: ReviewSectionProps) {
   if (session.status === "unauthenticated") {
     return (
       <>
-        <span className="font-bold">Kirjan arvostelut</span>
+        <div className="font-bold mb-8">Kirjan arvostelut</div>
         {reviewData?.map((review) => (
           <>
-            <div className="flex flex-col gap-4 sm:flex-row" key={review.id}>
-              {" "}
-              <div className="w-80 flex-1 gap-4 overflow-hidden break-words">
-                {review.content}
-              </div>
-              <ReviewScore reviewScore={review.score} />
-              <div className="keep-all flex items-center gap-2 overflow-hidden">
-                {review.user.name}
-                <Menu as="div" className="dropdown-end dropdown h-12">
+            <div className="flex flex-row gap-6" key={review.id}>
+              <Menu as="div" className="dropdown-end dropdown h-12">
                   <Menu.Button>
                     <Avatar user={review.user} size="s" />
                   </Menu.Button>
@@ -78,9 +71,18 @@ function ReviewSection(props: ReviewSectionProps) {
                     </Menu.Item>
                   </Menu.Items>
                 </Menu>
+              <div className="max-w-3xl flex flex-col gap-6 break-words overflow-hidden">                
+                <div className="flex flex-row justify-between">
+                  <div>{review.user.name}</div>                  
+                  <div>{review.createdAt.getUTCDate()}.{review.createdAt.getUTCMonth()+1}.{review.createdAt.getFullYear()}</div>    
+                </div>
+                <ReviewScore reviewScore={review.score} />
+                <div className="flex flex-col">
+                  {review.content}
+                </div>
               </div>
             </div>
-            <div className="w-100 flex sm:items-center sm:justify-center">
+            <div className="w-100 flex items-center justify-center">
               <div className="divider flex w-60 opacity-10"></div>
             </div>
           </>
@@ -199,15 +201,8 @@ function ReviewSection(props: ReviewSectionProps) {
         <span className="font-bold">Kirjan arvostelut</span>
         {reviewData?.map((review) => (
           <>
-            <div className="flex flex-col gap-4 sm:flex-row" key={review.id}>
-              {" "}
-              <div className="w-80 flex-1 gap-4 overflow-hidden break-words">
-                {review.content}
-              </div>
-              <ReviewScore reviewScore={review.score} />
-              <div className="keep-all flex gap-3 overflow-hidden">
-                {review.user.name}
-                <Menu as="div" className="dropdown-end dropdown h-12">
+            <div className="flex flex-row gap-6" key={review.id}>
+              <Menu as="div" className="dropdown-end dropdown h-12">
                   <Menu.Button>
                     <Avatar user={review.user} size="s" />
                   </Menu.Button>
@@ -226,9 +221,18 @@ function ReviewSection(props: ReviewSectionProps) {
                     </Menu.Item>
                   </Menu.Items>
                 </Menu>
+              <div className="max-w-3xl flex flex-col gap-6 break-words overflow-hidden">                
+                <div className="flex flex-row justify-between">
+                  <div>{review.user.name}</div>                  
+                  <div>{review.createdAt.getUTCDate()}.{review.createdAt.getUTCMonth()+1}.{review.createdAt.getFullYear()}</div>    
+                </div>
+                <ReviewScore reviewScore={review.score} />
+                <div className="flex flex-col">
+                  {review.content}
+                </div>
               </div>
             </div>
-            <div className="w-100 flex sm:items-center sm:justify-center">
+            <div className="w-100 flex items-center justify-center">
               <div className="divider flex w-60 opacity-10"></div>
             </div>
           </>
