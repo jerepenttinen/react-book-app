@@ -6,6 +6,7 @@ import type { BooksData, BookData } from "~/server/googlebooks/book-types";
 import { TRPCError } from "@trpc/server";
 import { type Context } from "../context";
 import { formatTitle } from "~/components/SearchResult";
+import { createReviewValidator } from "~/server/common/books-validators";
 
 const selectSafeUser = {
   id: true,
@@ -38,13 +39,7 @@ export const booksRouter = router({
       return got.get(new BooksQuery().id(input.id).build()).json();
     }),
   createReview: protectedProcedure
-    .input(
-      z.object({
-        bookId: z.string(),
-        score: z.number().min(-1).max(10),
-        content: z.string(),
-      }),
-    )
+    .input(createReviewValidator)
     .mutation(async ({ input, ctx }) => {
       await loadBookToDatabase(ctx, input.bookId);
       return await ctx.prisma.review.upsert({
@@ -63,6 +58,16 @@ export const booksRouter = router({
           userId: ctx.session.user.id,
           score: input.score,
           content: input.content,
+        },
+      });
+    }),
+  getMyBookReview: protectedProcedure
+    .input(z.object({ bookId: z.string() }))
+    .query(({ input, ctx }) => {
+      return ctx.prisma.review.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          bookId: input.bookId,
         },
       });
     }),

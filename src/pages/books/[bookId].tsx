@@ -8,13 +8,18 @@ import { Popover, RadioGroup } from "@headlessui/react";
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Avatar from "~/components/Avatar";
 import BookCover from "~/components/BookCover";
 import { Stars } from "~/components/Stars";
 import { formatDate } from "~/utils/format-date";
 import { Divider } from "~/components/Divider";
 import { DynamicTextWrapper } from "~/components/DynamicTextWrapper";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ErrorMessage } from "@hookform/error-message";
+import { createReviewValidator } from "~/server/common/books-validators";
+import { type z } from "zod";
 
 interface ReviewSectionProps {
   bookId: string;
@@ -41,7 +46,11 @@ function ReviewSection(props: ReviewSectionProps) {
     <section className="flex flex-col gap-8">
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
-        <div className="flex w-full flex-row gap-8" key={review.id}>
+        <div
+          className="flex w-full flex-row gap-8"
+          key={review.id}
+          id={review.id}
+        >
           <Link href={`/users/${review.user?.id}`}>
             <Avatar user={review.user} size="m" />
           </Link>
@@ -55,6 +64,11 @@ function ReviewSection(props: ReviewSectionProps) {
           </div>
         </div>
       ))}
+      {reviewData.length === 0 ? (
+        <div>Ei vielä yhtäkään arvostelua</div>
+      ) : (
+        <></>
+      )}
     </section>
   );
 }
@@ -65,120 +79,104 @@ interface CreateReviewProps {
 
 function CreateReview(props: CreateReviewProps) {
   const session = useSession();
-
   const trpcContext = trpc.useContext();
+
+  const { data: myReview, isLoading } = trpc.books.getMyBookReview.useQuery(
+    {
+      bookId: props.bookId,
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  );
 
   const createReview = trpc.books.createReview.useMutation({
     onSuccess: () => trpcContext.books.getBookReviews.invalidate(),
   });
 
-  if (!session.data) {
+  const { register, handleSubmit, formState, control, reset } = useForm<
+    z.infer<typeof createReviewValidator>
+  >({
+    resolver: zodResolver(createReviewValidator),
+  });
+
+  useEffect(() => {
+    reset(myReview ?? { score: 0, content: "" });
+  }, [reset, myReview, props.bookId]);
+
+  if (!session.data || isLoading) {
     return null;
   }
 
+  // 1..10
+  const radio = Array.from(Array(11).keys()).slice(1);
+
   return (
-    <section className="flex flex-col gap-8">
-      <form
-        className="flex flex-col gap-8"
-        onSubmit={(e: FormEvent<HTMLFormElement>) => {
-          e.preventDefault();
-          const arvostelu = (
-            document.getElementById("arvosteluTeksti") as HTMLInputElement
-          ).value;
-          const tahtiLista = document.getElementsByName(
-            "rating-10",
-          ) as NodeListOf<HTMLElement>;
-          let tahtia = "10";
-          tahtiLista.forEach((tahti) => {
-            if ((tahti as HTMLInputElement).checked) {
-              tahtia = (tahti as HTMLInputElement).value;
-            }
-          });
-          createReview.mutate({
-            bookId: props.bookId,
-            score: parseInt(tahtia),
-            content: arvostelu,
-          });
-        }}
+    <form
+      className="flex flex-col gap-8"
+      onSubmit={handleSubmit((data) =>
+        createReview.mutate(data, {
+          onSuccess: (review) => {
+            trpcContext.books.getBookReviews.invalidate();
+            trpcContext.books.getBookAverageScoreById.invalidate();
+            document.getElementById(review.id)?.scrollIntoView();
+          },
+        }),
+      )}
+    >
+      <input type="hidden" value={props.bookId} {...register("bookId")} />
+      <ErrorMessage errors={formState.errors} name="score" />
+      <Controller
+        control={control}
+        name="score"
+        render={({ field }) => (
+          <RadioGroup
+            value={field.value}
+            onChange={field.onChange}
+            className="rating rating-lg rating-half my-0 h-10"
+          >
+            {radio.map((value) => (
+              <RadioGroup.Option
+                key={value}
+                value={value}
+                className="outline-none"
+              >
+                <div className="relative w-5">
+                  <div
+                    className={`mask ${
+                      value % 2 === 1 ? "mask-half-1" : "mask-half-2"
+                    } mask-star absolute h-10 w-5 bg-secondary ${
+                      field.value < value ? "hidden" : ""
+                    }`}
+                  ></div>
+                  <div
+                    className={`mask ${
+                      value % 2 === 1 ? "mask-half-1" : "mask-half-2"
+                    } mask-star absolute h-10 w-5 bg-secondary/20`}
+                  ></div>
+                </div>
+              </RadioGroup.Option>
+            ))}
+          </RadioGroup>
+        )}
+      />
+
+      <ErrorMessage errors={formState.errors} name="content" />
+      <textarea
+        className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
+        placeholder="Muistathan kohteliaisuuden"
+        rows={5}
+        {...register("content")}
+      ></textarea>
+      <button
+        className="btn-primary btn w-max"
+        type="submit"
+        disabled={!formState.isValid}
       >
-        <div className="rating rating-lg rating-half my-0">
-          <input
-            type="radio"
-            name="rating-10"
-            className="rating-hidden hidden"
-          />
-          <input
-            value="1"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star bg-secondary"
-          />
-          <input
-            value="2"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star bg-secondary"
-          />
-          <input
-            value="3"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star bg-secondary"
-          />
-          <input
-            value="4"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star bg-secondary"
-          />
-          <input
-            value="5"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star bg-secondary"
-          />
-          <input
-            value="6"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star bg-secondary"
-          />
-          <input
-            value="7"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star bg-secondary"
-          />
-          <input
-            value="8"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star bg-secondary"
-          />
-          <input
-            value="9"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star bg-secondary"
-          />
-          <input
-            value="10"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star bg-secondary"
-          />
-        </div>
-        <textarea
-          className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
-          id="arvosteluTeksti"
-          placeholder="Muistathan kohteliaisuuden"
-          rows={5}
-        ></textarea>
-        <button className="btn-primary btn w-max" type="submit">
-          Lisää arvostelu
-        </button>
-      </form>
-    </section>
+        {myReview ? "Päivitä arvostelua" : "Lisää arvostelu"}
+      </button>
+    </form>
   );
 }
 
@@ -409,7 +407,6 @@ function BookInfo({ bookId }: BookInfoProps) {
   }
 
   const volume = bookData.volumeInfo;
-
   return (
     <div className="flex flex-col gap-8 lg:flex-row">
       <div className="flex flex-col gap-4">
