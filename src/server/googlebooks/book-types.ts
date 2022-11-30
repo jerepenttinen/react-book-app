@@ -9,8 +9,8 @@ export interface BookData {
     title: string;
     subtitle?: string;
     authors?: string[];
-    publisher: string;
-    publishedDate: string;
+    publisher?: string;
+    publishedDate?: string;
     description?: string;
     industryIdentifiers?: {
       type: string;

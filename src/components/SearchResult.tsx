@@ -26,7 +26,7 @@ function SearchResult({ book, compact }: SearchResultProps) {
     <div className={`flex flex-row ${compact ? "gap-2" : "gap-4"}`}>
       <BookCover book={book} size="s" compact={compact} />
 
-      <div className="prose flex w-4/5 flex-col">
+      <div className="flex w-4/5 flex-col">
         <Link
           href={`/books/${book.id}`}
           className={`${

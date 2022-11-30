@@ -23,7 +23,7 @@ export function Stars({ score, large }: StarsProps) {
   const [w, h] = large ? ["w-10", "h-10"] : ["w-4", "h-4"];
 
   return (
-    <div className="no-animation inline-flex w-max gap-px px-0 pb-2">
+    <div className="no-animation inline-flex w-max gap-px">
       {starPercentages.map((perc, i) => (
         <div key={i + "star"} className={`relative ${w} ${h}`}>
           <div

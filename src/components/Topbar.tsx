@@ -79,7 +79,7 @@ export function Searchbar() {
               ))}
             </div>
           )}
-          <div className="prose text-center">
+          <div className="text-center">
             {booksData && <Link href={searchUrl}>Näytä kaikki tulokset</Link>}
           </div>
         </Dialog.Panel>
@@ -102,7 +102,7 @@ function Topbar() {
       </div>
 
       {session.data ? (
-        <Menu as="div" className="dropdown dropdown-end h-12">
+        <Menu as="div" className="dropdown-end dropdown h-12">
           <Menu.Button>
             <Avatar user={session.data.user} size="s" />
           </Menu.Button>

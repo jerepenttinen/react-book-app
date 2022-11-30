@@ -126,7 +126,6 @@ const LibraryPage: NextPage = () => {
               {isMyLibrary ? (
                 <button
                   type="button"
-                  className="btn-sm btn-circle btn"
                   onClick={() => {
                     setBook(cell.row.original.book);
                   }}
@@ -206,9 +205,11 @@ const LibraryPage: NextPage = () => {
         open={modalIsOpen}
         onClose={closeModal}
       >
-        <Dialog.Panel className="prose modal-box border border-base-content border-opacity-20">
-          <Dialog.Title as="h3">Poista kirja</Dialog.Title>
-          <p>
+        <Dialog.Panel className="modal-box border border-base-content border-opacity-20">
+          <Dialog.Title as="h3" className="font-bold">
+            Poista kirja
+          </Dialog.Title>
+          <p className="my-4">
             Haluatko varmasti poistaa kirjan {book?.name + " "}
             kirjastostasi? Tätä toimintoa ei voi peruuttaa.
           </p>

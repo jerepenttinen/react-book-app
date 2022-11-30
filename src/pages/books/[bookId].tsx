@@ -319,9 +319,12 @@ function BookScore({ bookId }: { bookId: string }) {
   }
 
   return (
-    <div className="my-0 inline-flex gap-2">
+    <div className="my-0 inline-flex items-center gap-2">
       <Stars score={starData?._avg.score ?? 0} large />
-      <h1 className="my-0" title={`${starData?._count.score ?? 0} arvostelua`}>
+      <h1
+        className="text-4xl font-extrabold"
+        title={`${starData?._count.score ?? 0} arvostelua`}
+      >
         {score.toFixed(2)}
       </h1>
     </div>
@@ -356,9 +359,42 @@ function ReviewScore({ reviewScore }: { reviewScore: number }) {
           </div>
         ))}
       </div>
-      <h1 className="my-0">{score.toFixed(2)}</h1>
+      <h1 className="text-4xl font-extrabold">{score.toFixed(2)}</h1>
     </div>
   );
+}
+
+interface FormatISBNProps {
+  isbn?: {
+    type: string;
+    identifier: string;
+  }[];
+}
+
+function FormatISBN({ isbn }: FormatISBNProps) {
+  if (isbn === undefined) {
+    return null;
+  }
+
+  if (isbn.length === 2) {
+    const isbn10 = isbn?.at(0)?.identifier;
+    const isbn13 = isbn?.at(0)?.identifier;
+    if (isbn10 === undefined || isbn13 === undefined) {
+      return null;
+    }
+
+    return (
+      <span>
+        ISBN {isbn10} (ISBN13 {isbn13})
+      </span>
+    );
+  }
+
+  const identifier = isbn?.at(0)?.identifier;
+  if (identifier === undefined) {
+    return null;
+  }
+  return <span>ISBN {identifier}</span>;
 }
 
 const BookPage: NextPage = () => {
@@ -423,10 +459,10 @@ const BookPage: NextPage = () => {
           <AddToLibraryButton bookId={bookId} />
         </div>
         <div className="flex w-full grow flex-col gap-4 lg:w-5/6">
-          <h1 className="my-0">{formatTitle(bookData)}</h1>
+          <h1 className="text-4xl font-extrabold">{formatTitle(bookData)}</h1>
           <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
-          <div className="my-0 inline-flex gap-2">
+          <div className="inline-flex gap-2">
             <BookScore bookId={bookId} />
           </div>
           {volume.description && (
@@ -441,25 +477,21 @@ const BookPage: NextPage = () => {
               )}
               <div
                 ref={measureDescription}
-                className="order-1 overflow-y-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:block"
+                className="prose order-1 overflow-y-hidden text-lg [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:block"
               >
                 {parse(volume.description)}
               </div>
             </div>
           )}
           <div className="divider my-0"></div>
-          <div className="ga-2 flex flex-col">
+          <div className="flex flex-col gap-1 text-sm">
             {volume.pageCount && <span>{volume.pageCount} sivua</span>}
-            <span>Julkaistu {volume.publishedDate}</span>
-            <span>Kustantaja {volume.publisher}</span>
-            {
-              // TODO: Paremman näkösesti tulostus esim. ISBN 9522918253 (ISBN13 9789522918253)
-              volume.industryIdentifiers?.map((identifier, i) => (
-                <span key={"isbn" + i}>
-                  {identifier.type} {identifier.identifier}
-                </span>
-              ))
-            }
+            {volume.publishedDate && (
+              <span>Julkaistu {volume.publishedDate}</span>
+            )}
+            {volume.publisher && <span>Kustantaja {volume.publisher}</span>}
+
+            <FormatISBN isbn={volume.industryIdentifiers} />
           </div>
         </div>
       </div>
