@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
-import { IoCloseOutline } from "react-icons/io5";
+import { IoCaretDown, IoCaretUp, IoCloseOutline } from "react-icons/io5";
 import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Dialog } from "@headlessui/react";
@@ -109,7 +109,7 @@ const LibraryPage: NextPage = () => {
           return (
             <button
               type="button"
-              className="btn-ghost no-animation btn-sm btn inline-flex w-max gap-px px-0"
+              className="no-animation inline-flex w-max gap-px px-0 pb-2"
             >
               {starPercentages.map((perc, i) => (
                 <div key={i + "star"} className="relative h-4 w-4">
@@ -125,7 +125,11 @@ const LibraryPage: NextPage = () => {
             </button>
           );
         },
-        enableSorting: false,
+        sortingFn: (rowA, rowB) => {
+          const a = rowA.original.book.reviews.at(0)?.score ?? 0;
+          const b = rowB.original.book.reviews.at(0)?.score ?? 0;
+          return a - b;
+        },
       }),
       columnHelper.accessor("shelf", {
         header: () => <span>Hylly</span>,
@@ -179,7 +183,7 @@ const LibraryPage: NextPage = () => {
 
   return (
     <>
-      <table>
+      <table className="table-compact table w-full">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -189,7 +193,7 @@ const LibraryPage: NextPage = () => {
                     <div
                       className={
                         header.column.getCanSort()
-                          ? "cursor-pointer select-none"
+                          ? "flex cursor-pointer select-none flex-row items-center gap-px"
                           : ""
                       }
                       onClick={header.column.getToggleSortingHandler()}
@@ -198,6 +202,10 @@ const LibraryPage: NextPage = () => {
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
+                      {{
+                        asc: <IoCaretUp />,
+                        desc: <IoCaretDown />,
+                      }[header.column.getIsSorted() as string] ?? null}
                     </div>
                   )}
                 </th>
