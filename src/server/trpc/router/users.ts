@@ -1,6 +1,7 @@
 import { type Notification } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { FriendshipStatus } from "~/types/friendship-status";
 import { type Context } from "../context";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 
@@ -151,6 +152,67 @@ export const usersRouter = router({
 
       return acceptFriendRequest(ctx, notification);
     }),
+  getFriendshipStatus: protectedProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }): Promise<FriendshipStatus> => {
+      const [areFriends, friendRequest] = await ctx.prisma.$transaction([
+        ctx.prisma.user.count({
+          where: {
+            id: ctx.session.user.id,
+            friends: {
+              some: {
+                id: input.userId,
+              },
+            },
+          },
+        }),
+        ctx.prisma.notification.findFirst({
+          where: {
+            OR: [
+              {
+                fromUserId: ctx.session.user.id,
+                toUserId: input.userId,
+                type: "friend",
+              },
+              {
+                fromUserId: input.userId,
+                toUserId: ctx.session.user.id,
+                type: "friend",
+              },
+            ],
+          },
+        }),
+      ]);
+
+      if (areFriends === 1) {
+        return FriendshipStatus.FRIENDS;
+      }
+
+      if (friendRequest === null) {
+        return FriendshipStatus.NOT_FRIENDS;
+      }
+
+      if (friendRequest.fromUserId === input.userId) {
+        return FriendshipStatus.RECEIVED_REQUEST;
+      }
+
+      return FriendshipStatus.SENT_REQUEST;
+    }),
+  getMySentFriendRequests: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.notification.findMany({
+      where: {
+        fromUserId: ctx.session.user.id,
+      },
+      include: {
+        toUser: {
+          select: minimalUserSelect,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }),
 });
 
 async function acceptFriendRequest(ctx: Context, notification: Notification) {

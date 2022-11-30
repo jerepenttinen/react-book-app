@@ -8,19 +8,20 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
 import Avatar from "~/components/Avatar";
 import Link from "next/link";
 
-import { Dialog, Menu } from "@headlessui/react";
+import { Menu } from "@headlessui/react";
+import { Stars } from "~/components/Stars";
 
 interface ReviewSectionProps {
   bookId: string;
 }
-function ReviewSection(this: any, props: ReviewSectionProps) {
+function ReviewSection(props: ReviewSectionProps) {
   const session = useSession();
   const trpcContext = trpc.useContext();
   const {
@@ -338,19 +339,7 @@ function BookScore({ bookId }: { bookId: string }) {
 
   return (
     <div className="my-0 inline-flex gap-2">
-      <div className="inline-flex gap-px">
-        {starPercentages.map((perc, i) => (
-          <div key={i + "star"} className="relative h-10 w-10">
-            <div
-              style={{ width: `${2.5 * perc}rem` }}
-              className="absolute h-10 overflow-hidden"
-            >
-              <div className="mask mask-star-2 h-10 w-10 bg-secondary"></div>
-            </div>
-            <div className="mask mask-star-2 absolute h-10 w-10 bg-secondary/20"></div>
-          </div>
-        ))}
-      </div>
+      <Stars score={starData?._avg.score ?? 0} large />
       <h1 className="my-0" title={`${starData?._count.score ?? 0} arvostelua`}>
         {score.toFixed(2)}
       </h1>
@@ -456,61 +445,6 @@ const BookPage: NextPage = () => {
           <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
           <div className="my-0 inline-flex gap-2">
-            {/* TODO: Komponentti tästä */}
-            {/* <div className="rating rating-lg rating-half my-0">
-              <input type="radio" name="rating-10" className="rating-hidden" />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-            </div> */}
-
             <BookScore bookId={bookId} />
           </div>
           {volume.description && (

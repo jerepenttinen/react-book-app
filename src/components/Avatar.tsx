@@ -6,14 +6,20 @@ interface AvatarProps {
   size: "s" | "m" | "l";
 }
 
-const sizes = {
-  s: 48,
-  m: 64,
-  l: 256,
+interface Sizes {
+  s: [number, string, string, string];
+  m: [number, string, string, string];
+  l: [number, string, string, string];
+}
+
+const sizes: Sizes = {
+  s: [48, "w-12", "h-12", "text-lg"],
+  m: [64, "w-16", "h-16", "text-2xl"],
+  l: [256, "w-64", "h-64", "text-7xl"],
 };
 
 function Avatar(props: AvatarProps) {
-  const size = sizes[props.size];
+  const [size, w, h, fontSize] = sizes[props.size];
   if (!props.user) {
     return <>Error</>;
   }
@@ -21,7 +27,7 @@ function Avatar(props: AvatarProps) {
   return (
     <div className={`avatar ${!props.user.image && "placeholder"}`}>
       <div
-        className={`rounded-full w-[${size}px] h-[${size}px] bg-primary text-primary-content`}
+        className={`rounded-full ${w} ${h} bg-accent text-accent-content ${fontSize}`}
       >
         {props.user.image ? (
           <Image
@@ -33,7 +39,9 @@ function Avatar(props: AvatarProps) {
             priority
           />
         ) : (
-          <span>{props.user.name ?? "?"}</span>
+          <span className="select-none">
+            {props.user.name?.at(0)?.toUpperCase() ?? "?"}
+          </span>
         )}
       </div>
     </div>
