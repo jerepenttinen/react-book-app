@@ -186,12 +186,11 @@ function ReviewSection(props: ReviewSectionProps) {
               </div>
             </div>
             <textarea
-              className="text-gray-900 border-gray-300 focus:text-gray-900 focus:bg-white flex w-full rounded border border-solid bg-base-300 bg-clip-padding
-            px-3 py-1.5 text-base font-normal transition placeholder:text-medium focus:outline-none"
+              className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
               id="arvosteluTeksti"
               placeholder="Muistathan kohteliaisuuden!"
             ></textarea>
-            <button className="btn-primary btn w-32" type="submit">
+            <button className="btn-primary btn w-max" type="submit">
               Lisää arvostelu
             </button>
           </div>
@@ -373,16 +372,6 @@ function BookScore({ bookId }: { bookId: string }) {
     },
   );
   const score = starData?._avg.score ? starData._avg.score / 2 : 0;
-  const starPercentages = [0, 0, 0, 0, 0];
-
-  for (let i = 0; i < score; i++) {
-    starPercentages[i] = 1;
-  }
-
-  if (score < 5) {
-    // Set last star to the fraction of the score
-    starPercentages[Math.floor(score)] = score % 1;
-  }
 
   return (
     <div className="my-0 inline-flex items-center gap-2">
