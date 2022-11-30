@@ -1,29 +1,25 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "~/utils/trpc";
-
-import { ImRadioUnchecked, ImRadioChecked } from "react-icons/im";
+import { ImRadioChecked, ImRadioUnchecked } from "react-icons/im";
 import { IoLibrary } from "react-icons/io5";
 import { formatTitle } from "~/components/SearchResult";
-
+import { Popover, RadioGroup } from "@headlessui/react";
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
-import { Popover, RadioGroup } from "@headlessui/react";
-import BookCover from "~/components/BookCover";
-
-import Avatar from "~/components/Avatar";
 import Link from "next/link";
-
-import { Menu } from "@headlessui/react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import Avatar from "~/components/Avatar";
+import BookCover from "~/components/BookCover";
 import { Stars } from "~/components/Stars";
+import { formatDate } from "~/utils/format-date";
+import { Divider } from "~/components/Divider";
+import { DynamicTextWrapper } from "~/components/DynamicTextWrapper";
 
 interface ReviewSectionProps {
   bookId: string;
 }
 function ReviewSection(props: ReviewSectionProps) {
-  const session = useSession();
-  const trpcContext = trpc.useContext();
   const {
     data: reviewData,
     isLoading,
@@ -31,10 +27,6 @@ function ReviewSection(props: ReviewSectionProps) {
     error,
   } = trpc.books.getBookReviews.useQuery({
     id: props.bookId,
-  });
-
-  const createReview = trpc.books.createReview.useMutation({
-    onSuccess: () => trpcContext.books.getBookReviews.invalidate(),
   });
 
   if (isError) {
@@ -45,201 +37,149 @@ function ReviewSection(props: ReviewSectionProps) {
     return <>Ladataan...</>;
   }
 
-  if (session.status === "unauthenticated") {
-    return (
-      <>
-        <div className="font-bold mb-8">Kirjan arvostelut</div>
-        {reviewData?.map((review) => (
-          <>
-            <div className="flex flex-row gap-6" key={review.id}>
-              <Menu as="div" className="dropdown-end dropdown h-12">
-                  <Menu.Button>
-                    <Avatar user={review.user} size="s" />
-                  </Menu.Button>
-                  <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          href={`/users/${review.user?.id}`}
-                          className={`no-animation btn w-full justify-start rounded-none ${
-                            active ? "btn-primary" : ""
-                          }`}
-                        >
-                          Profiili
-                        </Link>
-                      )}
-                    </Menu.Item>
-                  </Menu.Items>
-                </Menu>
-              <div className="max-w-3xl flex flex-col gap-6 break-words overflow-hidden">                
-                <div className="flex flex-row justify-between">
-                  <div>{review.user.name}</div>                  
-                  <div>{review.createdAt.getUTCDate()}.{review.createdAt.getUTCMonth()+1}.{review.createdAt.getFullYear()}</div>    
-                </div>
-                <ReviewScore reviewScore={review.score} />
-                <div className="flex flex-col">
-                  {review.content}
-                </div>
-              </div>
+  return (
+    <section className="flex flex-col gap-8">
+      <span className="font-bold">Kirjan arvostelut</span>
+      {reviewData?.map((review) => (
+        <div className="flex w-full flex-row gap-8" key={review.id}>
+          <Link href={`/users/${review.user?.id}`}>
+            <Avatar user={review.user} size="m" />
+          </Link>
+          <div className="flex w-full flex-col gap-4 break-words">
+            <div className="flex w-full flex-row justify-between">
+              <span className="font-bold">{review.user.name}</span>
+              <span>{formatDate(review.createdAt)}</span>
             </div>
-            <div className="w-100 flex items-center justify-center">
-              <div className="divider flex w-60 opacity-10"></div>
-            </div>
-          </>
-        ))}
-      </>
-    );
-  } else if (session.status === "authenticated") {
-    return (
-      <section className="flex flex-col gap-4">
-        <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
-        <form
-          id="myform"
-          onSubmit={(e: FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
-            const arvostelu = (
-              document.getElementById("arvosteluTeksti") as HTMLInputElement
-            ).value;
-            const tahtiLista = document.getElementsByName(
-              "rating-10",
-            ) as NodeListOf<HTMLElement>;
-            let tahtia = "10";
-            tahtiLista.forEach((tahti) => {
-              if ((tahti as HTMLInputElement).checked) {
-                tahtia = (tahti as HTMLInputElement).value;
-              }
-            });
-            createReview.mutate({
-              bookId: props.bookId,
-              score: parseInt(tahtia),
-              content: arvostelu,
-            });
-          }}
-        >
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-row gap-4">
-              <Avatar user={session?.data?.user} size="s" />
-              <div className="rating rating-lg rating-half my-0">
-                <input
-                  type="radio"
-                  name="rating-10"
-                  className="rating-hidden"
-                />
-                <input
-                  value="1"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-1 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="2"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-2 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="3"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-1 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="4"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-2 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="5"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-1 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="6"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-2 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="7"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-1 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="8"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-2 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="9"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-1 mask-star-2 bg-secondary"
-                />
-                <input
-                  value="10"
-                  type="radio"
-                  name="rating-10"
-                  className="mask mask-half-2 mask-star-2 bg-secondary"
-                />
-              </div>
-            </div>
-            <textarea
-              className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
-              id="arvosteluTeksti"
-              placeholder="Muistathan kohteliaisuuden!"
-            ></textarea>
-            <button className="btn-primary btn w-max" type="submit">
-              Lisää arvostelu
-            </button>
+            <Stars score={review.score} medium />
+            <DynamicTextWrapper>{review.content}</DynamicTextWrapper>
           </div>
-        </form>
-        <div className="divider"></div>
-        <span className="font-bold">Kirjan arvostelut</span>
-        {reviewData?.map((review) => (
-          <>
-            <div className="flex flex-row gap-6" key={review.id}>
-              <Menu as="div" className="dropdown-end dropdown h-12">
-                  <Menu.Button>
-                    <Avatar user={review.user} size="s" />
-                  </Menu.Button>
-                  <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          href={`/users/${review.user?.id}`}
-                          className={`no-animation btn w-full justify-start rounded-none ${
-                            active ? "btn-primary" : ""
-                          }`}
-                        >
-                          Profiili
-                        </Link>
-                      )}
-                    </Menu.Item>
-                  </Menu.Items>
-                </Menu>
-              <div className="max-w-3xl flex flex-col gap-6 break-words overflow-hidden">                
-                <div className="flex flex-row justify-between">
-                  <div>{review.user.name}</div>                  
-                  <div>{review.createdAt.getUTCDate()}.{review.createdAt.getUTCMonth()+1}.{review.createdAt.getFullYear()}</div>    
-                </div>
-                <ReviewScore reviewScore={review.score} />
-                <div className="flex flex-col">
-                  {review.content}
-                </div>
-              </div>
-            </div>
-            <div className="w-100 flex items-center justify-center">
-              <div className="divider flex w-60 opacity-10"></div>
-            </div>
-          </>
-        ))}
-      </section>
-    );
+        </div>
+      ))}
+    </section>
+  );
+}
+
+interface CreateReviewProps {
+  bookId: string;
+}
+
+function CreateReview(props: CreateReviewProps) {
+  const session = useSession();
+
+  const trpcContext = trpc.useContext();
+
+  const createReview = trpc.books.createReview.useMutation({
+    onSuccess: () => trpcContext.books.getBookReviews.invalidate(),
+  });
+
+  if (!session.data) {
+    return null;
   }
+
+  return (
+    <section className="flex flex-col gap-8">
+      <form
+        className="flex flex-col gap-8"
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          const arvostelu = (
+            document.getElementById("arvosteluTeksti") as HTMLInputElement
+          ).value;
+          const tahtiLista = document.getElementsByName(
+            "rating-10",
+          ) as NodeListOf<HTMLElement>;
+          let tahtia = "10";
+          tahtiLista.forEach((tahti) => {
+            if ((tahti as HTMLInputElement).checked) {
+              tahtia = (tahti as HTMLInputElement).value;
+            }
+          });
+          createReview.mutate({
+            bookId: props.bookId,
+            score: parseInt(tahtia),
+            content: arvostelu,
+          });
+        }}
+      >
+        <div className="rating rating-lg rating-half my-0">
+          <input
+            type="radio"
+            name="rating-10"
+            className="rating-hidden hidden"
+          />
+          <input
+            value="1"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star bg-secondary"
+          />
+          <input
+            value="2"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star bg-secondary"
+          />
+          <input
+            value="3"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star bg-secondary"
+          />
+          <input
+            value="4"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star bg-secondary"
+          />
+          <input
+            value="5"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star bg-secondary"
+          />
+          <input
+            value="6"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star bg-secondary"
+          />
+          <input
+            value="7"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star bg-secondary"
+          />
+          <input
+            value="8"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star bg-secondary"
+          />
+          <input
+            value="9"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-1 mask-star bg-secondary"
+          />
+          <input
+            value="10"
+            type="radio"
+            name="rating-10"
+            className="mask mask-half-2 mask-star bg-secondary"
+          />
+        </div>
+        <textarea
+          className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
+          id="arvosteluTeksti"
+          placeholder="Muistathan kohteliaisuuden"
+          rows={5}
+        ></textarea>
+        <button className="btn-primary btn w-max" type="submit">
+          Lisää arvostelu
+        </button>
+      </form>
+    </section>
+  );
 }
 
 const shelves = [
@@ -380,44 +320,12 @@ function BookScore({ bookId }: { bookId: string }) {
   return (
     <div className="my-0 inline-flex items-center gap-2">
       <Stars score={starData?._avg.score ?? 0} large />
-      <h1
+      <span
         className="text-4xl font-extrabold"
         title={`${starData?._count.score ?? 0} arvostelua`}
       >
         {score.toFixed(2)}
-      </h1>
-    </div>
-  );
-}
-
-function ReviewScore({ reviewScore }: { reviewScore: number }) {
-  const score = reviewScore / 2;
-  const starPercentages = [0, 0, 0, 0, 0];
-
-  for (let i = 0; i < score; i++) {
-    starPercentages[i] = 1;
-  }
-
-  if (score < 5) {
-    // Set last star to the fraction of the score
-    starPercentages[Math.floor(score)] = score % 1;
-  }
-
-  return (
-    <div className="my-0 inline-flex gap-2">
-      <div className="inline-flex gap-px">
-        {starPercentages.map((perc, i) => (
-          <div key={i + "star"} className="relative h-10 w-10">
-            <div
-              style={{ width: `${2.5 * perc}rem` }}
-              className="absolute h-10 overflow-hidden"
-            >
-              <div className="mask mask-star-2 h-10 w-10 bg-secondary"></div>
-            </div>
-            <div className="mask mask-star-2 absolute h-10 w-10 bg-secondary/20"></div>
-          </div>
-        ))}
-      </div>
+      </span>
     </div>
   );
 }
@@ -455,23 +363,11 @@ function FormatISBN({ isbn }: FormatISBNProps) {
   return <span>ISBN {identifier}</span>;
 }
 
-const BookPage: NextPage = () => {
-  const router = useRouter();
-  const { bookId } = router.query;
+interface BookInfoProps {
+  bookId: string;
+}
 
-  const [descriptionHasOverflow, setDescriptionHasOverflow] = useState(false);
-
-  const measureDescription = useCallback(
-    (description: HTMLDivElement | null) => {
-      setDescriptionHasOverflow(
-        !!description
-          ? description?.scrollHeight > description?.clientHeight
-          : false,
-      );
-    },
-    [],
-  );
-
+function BookInfo({ bookId }: BookInfoProps) {
   const {
     data: bookData,
     isLoading,
@@ -487,13 +383,18 @@ const BookPage: NextPage = () => {
     },
   );
 
-  if (
-    typeof bookId !== "string" ||
-    bookId === undefined ||
-    bookId.length === 0
-  ) {
-    return <></>;
-  }
+  const [descriptionHasOverflow, setDescriptionHasOverflow] = useState(false);
+
+  const measureDescription = useCallback(
+    (description: HTMLDivElement | null) => {
+      setDescriptionHasOverflow(
+        !!description
+          ? description?.scrollHeight > description?.clientHeight
+          : false,
+      );
+    },
+    [],
+  );
 
   if (isError) {
     return <>{error.message}</>;
@@ -510,52 +411,79 @@ const BookPage: NextPage = () => {
   const volume = bookData.volumeInfo;
 
   return (
-    <>
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="flex flex-col gap-4">
-          <BookCover book={bookData} size="l" withoutLink={true} />
-          <AddToLibraryButton bookId={bookId} />
+    <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="flex flex-col gap-4">
+        <BookCover book={bookData} size="l" withoutLink={true} />
+        <AddToLibraryButton bookId={bookId} />
+      </div>
+      <div className="flex w-full grow flex-col gap-4 lg:w-5/6">
+        <h1 className="text-4xl font-extrabold">{formatTitle(bookData)}</h1>
+        <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
+
+        <div className="inline-flex gap-2">
+          <BookScore bookId={bookId} />
         </div>
-        <div className="flex w-full grow flex-col gap-4 lg:w-5/6">
-          <h1 className="text-4xl font-extrabold">{formatTitle(bookData)}</h1>
-          <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
-
-          <div className="inline-flex gap-2">
-            <BookScore bookId={bookId} />
-          </div>
-          {volume.description && (
-            <div className="flex flex-shrink flex-col">
-              {descriptionHasOverflow ? (
-                <input
-                  type="checkbox"
-                  className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
-                />
-              ) : (
-                <></>
-              )}
-              <div
-                ref={measureDescription}
-                className="prose order-1 overflow-y-hidden text-lg [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:block"
-              >
-                {parse(volume.description)}
-              </div>
-            </div>
-          )}
-          <div className="divider my-0"></div>
-          <div className="flex flex-col gap-1 text-sm">
-            {volume.pageCount && <span>{volume.pageCount} sivua</span>}
-            {volume.publishedDate && (
-              <span>Julkaistu {volume.publishedDate}</span>
+        {volume.description && (
+          <div className="flex flex-shrink flex-col">
+            {descriptionHasOverflow ? (
+              <input
+                type="checkbox"
+                className="peer/more link order-2 appearance-none before:content-['Lisää'] before:checked:content-['Vähemmän']"
+              />
+            ) : (
+              <></>
             )}
-            {volume.publisher && <span>Kustantaja {volume.publisher}</span>}
-
-            <FormatISBN isbn={volume.industryIdentifiers} />
+            <div
+              ref={measureDescription}
+              className="prose order-1 overflow-y-hidden text-lg [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4] peer-checked/more:block"
+            >
+              {parse(volume.description)}
+            </div>
           </div>
+        )}
+        <Divider />
+        <div className="flex flex-col gap-1 text-sm">
+          {volume.pageCount && <span>{volume.pageCount} sivua</span>}
+          {volume.publishedDate && (
+            <span>Julkaistu {volume.publishedDate}</span>
+          )}
+          {volume.publisher && <span>Kustantaja {volume.publisher}</span>}
+
+          <FormatISBN isbn={volume.industryIdentifiers} />
         </div>
       </div>
-      <div className="divider"></div>
+    </div>
+  );
+}
+
+const BookPage: NextPage = () => {
+  const router = useRouter();
+  const { bookId } = router.query;
+  const session = useSession();
+
+  if (
+    typeof bookId !== "string" ||
+    bookId === undefined ||
+    bookId.length === 0
+  ) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+      <BookInfo bookId={bookId} />
+      {session.data ? (
+        <>
+          <Divider />
+          <span className="font-bold">Kerro muille mitä pidit kirjasta</span>
+          <CreateReview bookId={bookId} />
+        </>
+      ) : (
+        <></>
+      )}
+      <Divider />
       <ReviewSection bookId={bookId} />
-    </>
+    </div>
   );
 };
 

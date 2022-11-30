@@ -13,6 +13,7 @@ import {
 } from "react-icons/io5";
 import { trpc } from "~/utils/trpc";
 import BookCover from "./BookCover";
+import { Divider } from "./Divider";
 import { Searchbar } from "./Topbar";
 
 interface IconLinkProps {
@@ -54,7 +55,7 @@ function NotificationsLink() {
     >
       <div className="indicator">
         <span
-          className={`badge badge-error badge-xs indicator-item ${
+          className={`badge-error badge badge-xs indicator-item ${
             notificationCountData ? "" : "hidden"
           }`}
         >
@@ -120,7 +121,7 @@ function Sidebar() {
         {readingBooksData && readingBooksData.length > 0 && (
           <>
             <section className="mb-8 mt-6 flex flex-col gap-8 px-4">
-              <div className="divider my-0 text-medium"></div>
+              <Divider />
               <span className="text-lg font-bold">Parhaillaan lukemassa</span>
               {readingBooksData.map((savedBook) => (
                 <div key={savedBook.id} className="flex h-min flex-row gap-4">

@@ -11,20 +11,16 @@ import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import { IoCaretDown, IoCaretUp, IoCloseOutline } from "react-icons/io5";
 import { useEffect, useMemo, useState } from "react";
-import dayjs from "dayjs";
 import { Dialog } from "@headlessui/react";
 import { type Book } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { Stars } from "~/components/Stars";
+import { formatDate } from "~/utils/format-date";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
-
-export function formatDate(date?: Date | null) {
-  return date ? dayjs(date).format("DD.MM.YYYY") : "";
-}
 
 const shelves = new Map<string, string>([
   ["shelf", "Hyllyssä"],

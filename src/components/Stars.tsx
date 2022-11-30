@@ -5,9 +5,10 @@ function clamp(n: number, min: number, max: number) {
 interface StarsProps {
   score: number;
   large?: boolean;
+  medium?: boolean;
 }
 
-export function Stars({ score, large }: StarsProps) {
+export function Stars({ score, large, medium }: StarsProps) {
   const clampedScore = clamp(score / 2, 0, 5);
   const starPercentages = [0, 0, 0, 0, 0];
 
@@ -20,19 +21,23 @@ export function Stars({ score, large }: StarsProps) {
     starPercentages[Math.trunc(clampedScore)] = clampedScore % 1;
   }
 
-  const [w, h] = large ? ["w-10", "h-10"] : ["w-4", "h-4"];
+  const [w, h] = large
+    ? ["w-10", "h-10"]
+    : medium
+    ? ["w-6", "h-6"]
+    : ["w-4", "h-4"];
 
   return (
-    <div className="no-animation inline-flex w-max gap-px">
+    <div className="inline-flex w-max gap-px">
       {starPercentages.map((perc, i) => (
         <div key={i + "star"} className={`relative ${w} ${h}`}>
           <div
             style={{ width: `${perc * 100}%` }}
             className={`absolute ${h} overflow-hidden`}
           >
-            <div className={`mask mask-star-2 ${w} ${h} bg-secondary`}></div>
+            <div className={`mask mask-star ${w} ${h} bg-secondary`}></div>
           </div>
-          <div className={`mask mask-star-2 ${w} ${h} bg-secondary/20`}></div>
+          <div className={`mask mask-star ${w} ${h} bg-secondary/20`}></div>
         </div>
       ))}
     </div>

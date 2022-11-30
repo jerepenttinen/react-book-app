@@ -4,10 +4,10 @@ import Avatar from "~/components/Avatar";
 import { trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
-import { formatDate } from "./library";
 import { IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
 import { useSession } from "next-auth/react";
 import { FriendshipStatus } from "~/types/friendship-status";
+import { formatDate } from "~/utils/format-date";
 
 function AddFriendButton(props: { userId: string }) {
   const session = useSession();
