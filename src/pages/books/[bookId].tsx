@@ -22,6 +22,7 @@ interface ReviewSectionProps {
   bookId: string;
 }
 function ReviewSection(props: ReviewSectionProps) {
+  const session = useSession();
   const trpcContext = trpc.useContext();
   const {
     data: reviewData,
@@ -44,133 +45,198 @@ function ReviewSection(props: ReviewSectionProps) {
     return <>Ladataan...</>;
   }
 
-  return (
-    <section className="flex flex-col">
-      <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
-      <form
-        id="myform"
-        onSubmit={(e: FormEvent<HTMLFormElement>) => {
-          e.preventDefault();
-          const arvostelu = (
-            document.getElementById("arvosteluTeksti") as HTMLInputElement
-          ).value;
-          const tahtiLista = document.getElementsByName(
-            "rating-10",
-          ) as NodeListOf<HTMLElement>;
-          let tahtia = "10";
-          tahtiLista.forEach((tahti) => {
-            if ((tahti as HTMLInputElement).checked) {
-              tahtia = (tahti as HTMLInputElement).value;
-            }
-          });
-          createReview.mutate({
-            bookId: props.bookId,
-            score: parseInt(tahtia),
-            content: arvostelu,
-          });
-        }}
-      >
-        <div className="rating rating-lg rating-half my-0">
-          <input type="radio" name="rating-10" className="rating-hidden" />
-          <input
-            value="1"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star-2 bg-secondary"
-          />
-          <input
-            value="2"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star-2 bg-secondary"
-          />
-          <input
-            value="3"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star-2 bg-secondary"
-          />
-          <input
-            value="4"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star-2 bg-secondary"
-          />
-          <input
-            value="5"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star-2 bg-secondary"
-          />
-          <input
-            value="6"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star-2 bg-secondary"
-          />
-          <input
-            value="7"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star-2 bg-secondary"
-          />
-          <input
-            value="8"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star-2 bg-secondary"
-          />
-          <input
-            value="9"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-1 mask-star-2 bg-secondary"
-          />
-          <input
-            value="10"
-            type="radio"
-            name="rating-10"
-            className="mask mask-half-2 mask-star-2 bg-secondary"
-          />
-        </div>
-        <textarea
-          name=""
-          id="arvosteluTeksti"
-          defaultValue={"Kerro meille Zorbas"}
-        ></textarea>
-        <button className="btn-primary btn" type="submit">
-          Lisää arvostelu
-        </button>
-      </form>
-      <div className="divider"></div>
-      <span className="font-bold">Kirjan arvostelut</span>
-      {reviewData?.map((review) => (
-        <div key={review.id}>
-          {review.content} <ReviewScore reviewScore={review.score} /> By:{" "}
-          {review.user.name}
-          <Menu as="div" className="dropdown-end dropdown h-12">
-            <Menu.Button>
-              <Avatar user={review.user} size="s" />
-            </Menu.Button>
-            <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
-              <Menu.Item>
-                {({ active }) => (
-                  <Link
-                    href={`/users/${review.user?.id}`}
-                    className={`no-animation btn w-full justify-start rounded-none ${
-                      active ? "btn-primary" : ""
-                    } `}
-                  >
-                    Profiili
-                  </Link>
-                )}
-              </Menu.Item>
-            </Menu.Items>
-          </Menu>
-        </div>
-      ))}
-    </section>
-  );
+  if (session.status === "unauthenticated") {
+    return (
+      <>
+        <span className="font-bold">Kirjan arvostelut</span>
+        {reviewData?.map((review) => (
+          <>
+            <div className="flex flex-col gap-4 sm:flex-row" key={review.id}>
+              {" "}
+              <div className="w-80 flex-1 gap-4 overflow-hidden break-words">
+                {review.content}
+              </div>
+              <ReviewScore reviewScore={review.score} />
+              <div className="keep-all flex items-center gap-2 overflow-hidden">
+                {review.user.name}
+                <Menu as="div" className="dropdown-end dropdown h-12">
+                  <Menu.Button>
+                    <Avatar user={review.user} size="s" />
+                  </Menu.Button>
+                  <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href={`/users/${review.user?.id}`}
+                          className={`no-animation btn w-full justify-start rounded-none ${
+                            active ? "btn-primary" : ""
+                          }`}
+                        >
+                          Profiili
+                        </Link>
+                      )}
+                    </Menu.Item>
+                  </Menu.Items>
+                </Menu>
+              </div>
+            </div>
+            <div className="w-100 flex sm:items-center sm:justify-center">
+              <div className="divider flex w-60 opacity-10"></div>
+            </div>
+          </>
+        ))}
+      </>
+    );
+  } else if (session.status === "authenticated") {
+    return (
+      <section className="flex flex-col gap-4">
+        <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
+        <form
+          id="myform"
+          onSubmit={(e: FormEvent<HTMLFormElement>) => {
+            e.preventDefault();
+            const arvostelu = (
+              document.getElementById("arvosteluTeksti") as HTMLInputElement
+            ).value;
+            const tahtiLista = document.getElementsByName(
+              "rating-10",
+            ) as NodeListOf<HTMLElement>;
+            let tahtia = "10";
+            tahtiLista.forEach((tahti) => {
+              if ((tahti as HTMLInputElement).checked) {
+                tahtia = (tahti as HTMLInputElement).value;
+              }
+            });
+            createReview.mutate({
+              bookId: props.bookId,
+              score: parseInt(tahtia),
+              content: arvostelu,
+            });
+          }}
+        >
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-row gap-4">
+              <Avatar user={session?.data?.user} size="s" />
+              <div className="rating rating-lg rating-half my-0">
+                <input
+                  type="radio"
+                  name="rating-10"
+                  className="rating-hidden"
+                />
+                <input
+                  value="1"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-1 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="2"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-2 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="3"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-1 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="4"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-2 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="5"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-1 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="6"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-2 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="7"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-1 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="8"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-2 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="9"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-1 mask-star-2 bg-secondary"
+                />
+                <input
+                  value="10"
+                  type="radio"
+                  name="rating-10"
+                  className="mask mask-half-2 mask-star-2 bg-secondary"
+                />
+              </div>
+            </div>
+            <textarea
+              className="text-gray-900 border-gray-300 focus:text-gray-900 focus:bg-white flex w-full rounded border border-solid bg-base-300 bg-clip-padding
+            px-3 py-1.5 text-base font-normal transition placeholder:text-medium focus:outline-none"
+              id="arvosteluTeksti"
+              placeholder="Muistathan kohteliaisuuden!"
+            ></textarea>
+            <button className="btn-primary btn w-32" type="submit">
+              Lisää arvostelu
+            </button>
+          </div>
+        </form>
+        <div className="divider"></div>
+        <span className="font-bold">Kirjan arvostelut</span>
+        {reviewData?.map((review) => (
+          <>
+            <div className="flex flex-col gap-4 sm:flex-row" key={review.id}>
+              {" "}
+              <div className="w-80 flex-1 gap-4 overflow-hidden break-words">
+                {review.content}
+              </div>
+              <ReviewScore reviewScore={review.score} />
+              <div className="keep-all flex gap-3 overflow-hidden">
+                {review.user.name}
+                <Menu as="div" className="dropdown-end dropdown h-12">
+                  <Menu.Button>
+                    <Avatar user={review.user} size="s" />
+                  </Menu.Button>
+                  <Menu.Items className="dropdown-content rounded-box flex w-32 flex-col border border-medium bg-base-100 py-4 shadow-xl">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href={`/users/${review.user?.id}`}
+                          className={`no-animation btn w-full justify-start rounded-none ${
+                            active ? "btn-primary" : ""
+                          }`}
+                        >
+                          Profiili
+                        </Link>
+                      )}
+                    </Menu.Item>
+                  </Menu.Items>
+                </Menu>
+              </div>
+            </div>
+            <div className="w-100 flex sm:items-center sm:justify-center">
+              <div className="divider flex w-60 opacity-10"></div>
+            </div>
+          </>
+        ))}
+      </section>
+    );
+  }
 }
 
 const shelves = [
@@ -359,7 +425,6 @@ function ReviewScore({ reviewScore }: { reviewScore: number }) {
           </div>
         ))}
       </div>
-      <h1 className="text-4xl font-extrabold">{score.toFixed(2)}</h1>
     </div>
   );
 }
