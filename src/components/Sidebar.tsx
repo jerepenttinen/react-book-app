@@ -54,7 +54,7 @@ function NotificationsLink() {
     >
       <div className="indicator">
         <span
-          className={`badge badge-error badge-xs indicator-item ${
+          className={`badge-error badge badge-xs indicator-item ${
             notificationCountData ? "" : "hidden"
           }`}
         >
@@ -78,7 +78,7 @@ function Sidebar() {
   );
 
   return (
-    <div className="drawer-side">
+    <div className="drawer-side text-lg">
       <label htmlFor="my-drawer" className="drawer-overlay"></label>
       <ul className="menu w-72 bg-base-300">
         <li>
@@ -136,7 +136,7 @@ function Sidebar() {
                     >
                       {savedBook.book.name}
                     </Link>
-                    <span>
+                    <span className="text-xs">
                       {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
                     </span>
                     <button
