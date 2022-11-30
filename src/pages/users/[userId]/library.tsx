@@ -17,6 +17,7 @@ import { type Book } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { Stars } from "~/components/Stars";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
@@ -94,37 +95,11 @@ const LibraryPage: NextPage = () => {
       }),
       columnHelper.accessor("book.reviews", {
         header: () => <span>Arvostelu</span>,
-        cell: (cell) => {
-          const score = (cell.getValue().at(0)?.score ?? 0) / 2;
-          const starPercentages = [0, 0, 0, 0, 0];
-
-          for (let i = 0; i < score; i++) {
-            starPercentages[i] = 1;
-          }
-
-          if (score < 5) {
-            // Set last star to the fraction of the score
-            starPercentages[Math.floor(score)] = score % 1;
-          }
-          return (
-            <button
-              type="button"
-              className="no-animation inline-flex w-max gap-px px-0 pb-2"
-            >
-              {starPercentages.map((perc, i) => (
-                <div key={i + "star"} className="relative h-4 w-4">
-                  <div
-                    style={{ width: `${perc}rem` }}
-                    className="absolute h-4 overflow-hidden"
-                  >
-                    <div className="mask mask-star-2 h-4 w-4 bg-secondary"></div>
-                  </div>
-                  <div className="mask mask-star-2 absolute h-4 w-4 bg-secondary/20"></div>
-                </div>
-              ))}
-            </button>
-          );
-        },
+        cell: (cell) => (
+          <button type="button" className="no-animation pb-2">
+            <Stars score={cell.getValue().at(0)?.score ?? 0} />
+          </button>
+        ),
         sortingFn: (rowA, rowB) => {
           const a = rowA.original.book.reviews.at(0)?.score ?? 0;
           const b = rowB.original.book.reviews.at(0)?.score ?? 0;

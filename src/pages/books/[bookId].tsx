@@ -8,19 +8,20 @@ import { formatTitle } from "~/components/SearchResult";
 
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Popover, RadioGroup } from "@headlessui/react";
 import BookCover from "~/components/BookCover";
 
 import Avatar from "~/components/Avatar";
 import Link from "next/link";
 
-import { Dialog, Menu } from "@headlessui/react";
+import { Menu } from "@headlessui/react";
+import { Stars } from "~/components/Stars";
 
 interface ReviewSectionProps {
   bookId: string;
 }
-function ReviewSection(this: any, props: ReviewSectionProps) {
+function ReviewSection(props: ReviewSectionProps) {
   const trpcContext = trpc.useContext();
   const {
     data: reviewData,
@@ -46,22 +47,29 @@ function ReviewSection(this: any, props: ReviewSectionProps) {
   return (
     <section className="flex flex-col">
       <span className="font-bold">Kerro muille mitä pidit kirjasta!</span>
-      <form id="myform" onSubmit={(e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const arvostelu = (document.getElementById("arvosteluTeksti") as HTMLInputElement).value;
-        const tahtiLista = (document.getElementsByName("rating-10") as NodeListOf<HTMLElement>);
-        let tahtia = "10";
-        tahtiLista.forEach(tahti => {
-          if ((tahti as HTMLInputElement).checked) {
-            tahtia = (tahti as HTMLInputElement).value;
-          }
-        });
-        createReview.mutate({
-          bookId: props.bookId,
-          score: parseInt(tahtia),
-          content: arvostelu,
-        });
-      }}>
+      <form
+        id="myform"
+        onSubmit={(e: FormEvent<HTMLFormElement>) => {
+          e.preventDefault();
+          const arvostelu = (
+            document.getElementById("arvosteluTeksti") as HTMLInputElement
+          ).value;
+          const tahtiLista = document.getElementsByName(
+            "rating-10",
+          ) as NodeListOf<HTMLElement>;
+          let tahtia = "10";
+          tahtiLista.forEach((tahti) => {
+            if ((tahti as HTMLInputElement).checked) {
+              tahtia = (tahti as HTMLInputElement).value;
+            }
+          });
+          createReview.mutate({
+            bookId: props.bookId,
+            score: parseInt(tahtia),
+            content: arvostelu,
+          });
+        }}
+      >
         <div className="rating rating-lg rating-half my-0">
           <input type="radio" name="rating-10" className="rating-hidden" />
           <input
@@ -125,14 +133,22 @@ function ReviewSection(this: any, props: ReviewSectionProps) {
             className="mask mask-half-2 mask-star-2 bg-secondary"
           />
         </div>
-        <textarea name="" id="arvosteluTeksti" defaultValue={"Kerro meille Zorbas"}></textarea>
-        <button className="btn-primary btn" type="submit">Lisää arvostelu</button>
+        <textarea
+          name=""
+          id="arvosteluTeksti"
+          defaultValue={"Kerro meille Zorbas"}
+        ></textarea>
+        <button className="btn-primary btn" type="submit">
+          Lisää arvostelu
+        </button>
       </form>
       <div className="divider"></div>
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
-        <div key={review.id}>{review.content} <ReviewScore reviewScore={review.score} /> By: {review.user.name}
-          <Menu as="div" className="dropdown dropdown-end h-12">
+        <div key={review.id}>
+          {review.content} <ReviewScore reviewScore={review.score} /> By:{" "}
+          {review.user.name}
+          <Menu as="div" className="dropdown-end dropdown h-12">
             <Menu.Button>
               <Avatar user={review.user} size="s" />
             </Menu.Button>
@@ -141,15 +157,17 @@ function ReviewSection(this: any, props: ReviewSectionProps) {
                 {({ active }) => (
                   <Link
                     href={`/users/${review.user?.id}`}
-                    className={`no-animation btn w-full justify-start rounded-none ${active ? "btn-primary" : ""
-                      } `}
+                    className={`no-animation btn w-full justify-start rounded-none ${
+                      active ? "btn-primary" : ""
+                    } `}
                   >
                     Profiili
                   </Link>
                 )}
               </Menu.Item>
             </Menu.Items>
-          </Menu></div>
+          </Menu>
+        </div>
       ))}
     </section>
   );
@@ -302,19 +320,7 @@ function BookScore({ bookId }: { bookId: string }) {
 
   return (
     <div className="my-0 inline-flex gap-2">
-      <div className="inline-flex gap-px">
-        {starPercentages.map((perc, i) => (
-          <div key={i + "star"} className="relative h-10 w-10">
-            <div
-              style={{ width: `${2.5 * perc}rem` }}
-              className="absolute h-10 overflow-hidden"
-            >
-              <div className="mask mask-star-2 h-10 w-10 bg-secondary"></div>
-            </div>
-            <div className="mask mask-star-2 absolute h-10 w-10 bg-secondary/20"></div>
-          </div>
-        ))}
-      </div>
+      <Stars score={starData?._avg.score ?? 0} large />
       <h1 className="my-0" title={`${starData?._count.score ?? 0} arvostelua`}>
         {score.toFixed(2)}
       </h1>
@@ -350,9 +356,7 @@ function ReviewScore({ reviewScore }: { reviewScore: number }) {
           </div>
         ))}
       </div>
-      <h1 className="my-0">
-        {score.toFixed(2)}
-      </h1>
+      <h1 className="my-0">{score.toFixed(2)}</h1>
     </div>
   );
 }
@@ -423,61 +427,6 @@ const BookPage: NextPage = () => {
           <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
           <div className="my-0 inline-flex gap-2">
-            {/* TODO: Komponentti tästä */}
-            {/* <div className="rating rating-lg rating-half my-0">
-              <input type="radio" name="rating-10" className="rating-hidden" />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-1 mask-star-2 bg-secondary"
-              />
-              <input
-                type="radio"
-                name="rating-10"
-                className="mask mask-half-2 mask-star-2 bg-secondary"
-              />
-            </div> */}
-
             <BookScore bookId={bookId} />
           </div>
           {volume.description && (
