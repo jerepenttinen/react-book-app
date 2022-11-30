@@ -37,7 +37,9 @@ function Avatar(props: AvatarProps) {
             priority
           />
         ) : (
-          <span>{props.user.name?.at(0)?.toUpperCase() ?? "?"}</span>
+          <span className="select-none">
+            {props.user.name?.at(0)?.toUpperCase() ?? "?"}
+          </span>
         )}
       </div>
     </div>
