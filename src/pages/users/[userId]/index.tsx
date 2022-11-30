@@ -6,22 +6,85 @@ import BookCover from "~/components/BookCover";
 import Link from "next/link";
 import { formatDate } from "./library";
 import { IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
+import { useSession } from "next-auth/react";
+import { FriendshipStatus } from "~/types/friendship-status";
 
 function AddFriendButton(props: { userId: string }) {
+  const session = useSession();
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
-  return (
-    <button
-      type="button"
-      className="btn-primary btn-lg btn rounded-full"
-      onClick={() => {
-        addFriendMutation.mutate({
-          targetUserId: props.userId,
-        });
-      }}
-    >
-      Lisää kaveriksi
-    </button>
+  const trpcContext = trpc.useContext();
+
+  const { data: friendStatus } = trpc.users.getFriendshipStatus.useQuery(
+    {
+      userId: props.userId,
+    },
+    {
+      enabled: !!session.data?.user,
+      retry: 0,
+    },
   );
+
+  if (!session.data?.user) {
+    return null;
+  }
+
+  if (session.data?.user.id === props.userId) {
+    return (
+      <button className="btn-primary btn-lg btn rounded-full">
+        Muokkaa profiilia
+      </button>
+    );
+  }
+
+  if (friendStatus === undefined) {
+    return null;
+  }
+
+  switch (friendStatus) {
+    case FriendshipStatus.NOT_FRIENDS:
+    case FriendshipStatus.RECEIVED_REQUEST: {
+      return (
+        <button
+          type="button"
+          className="btn-primary btn-lg btn rounded-full"
+          onClick={() => {
+            addFriendMutation.mutate(
+              {
+                targetUserId: props.userId,
+              },
+              {
+                onSuccess: () =>
+                  trpcContext.users.getFriendshipStatus.invalidate(),
+              },
+            );
+          }}
+        >
+          Lisää kaveriksi
+        </button>
+      );
+    }
+    case FriendshipStatus.FRIENDS: {
+      return (
+        <button
+          type="button"
+          className="btn-primary no-animation btn-lg btn rounded-full"
+        >
+          Kavereita
+        </button>
+      );
+    }
+    case FriendshipStatus.SENT_REQUEST: {
+      return (
+        <button
+          type="button"
+          className="btn-primary no-animation btn-lg btn rounded-full"
+        >
+          Kaveripyyntö lähetetty
+        </button>
+      );
+    }
+  }
+  throw new Error("AddFriendButton non exhaustive");
 }
 
 function LibraryPreview(props: { userId: string }) {
@@ -69,7 +132,7 @@ function FavoriteBooks(props: { userId: string }) {
 
   return (
     <>
-      {!!favoriteData ? (
+      {!!favoriteData && favoriteData.length > 0 ? (
         <section className="flex flex-col gap-4">
           <span className="text-lg font-bold">Lempi kirjat</span>
           <div className="flex flex-row gap-4">
