@@ -46,21 +46,19 @@ function ReviewSection(props: ReviewSectionProps) {
     <section className="flex flex-col gap-8">
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
-        <div
-          className="flex w-full flex-row gap-8"
-          key={review.id}
-          id={review.id}
-        >
-          <Link href={`/users/${review.user?.id}`}>
+        <div className="flex flex-row gap-8" key={review.id} id={review.id}>
+          <Link href={`/users/${review.user?.id}`} className="h-min w-min">
             <Avatar user={review.user} size="m" />
           </Link>
-          <div className="flex w-full flex-col gap-4 break-words">
-            <div className="flex w-full flex-row justify-between">
+          <div className="flex grow flex-col gap-4">
+            <div className="flex flex-row justify-between">
               <span className="font-bold">{review.user.name}</span>
               <span>{formatDate(review.createdAt)}</span>
             </div>
             <Stars score={review.score} medium />
-            <DynamicTextWrapper>{review.content}</DynamicTextWrapper>
+            <DynamicTextWrapper className="break-all">
+              {review.content}
+            </DynamicTextWrapper>
           </div>
         </div>
       ))}

@@ -5,7 +5,12 @@ interface DynamicTextWrapperProps {
 
 export function DynamicTextWrapper(props: DynamicTextWrapperProps) {
   return (
-    <div className={"whitespace-pre-wrap break-words " + props.className}>
+    <div
+      className={
+        "whitespace-pre-line break-words [hyphens:auto] " + props.className ??
+        ""
+      }
+    >
       {props.children}
     </div>
   );

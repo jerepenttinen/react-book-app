@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { Stars } from "~/components/Stars";
 import { formatDate } from "~/utils/format-date";
+import { DynamicTextWrapper } from "~/components/DynamicTextWrapper";
 
 type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
 const columnHelper = createColumnHelper<RowType>();
@@ -81,13 +82,21 @@ const LibraryPage: NextPage = () => {
       columnHelper.accessor("book.name", {
         header: () => <span>Nimi</span>,
         cell: (cell) => (
-          <Link href={`/books/${cell.row.original.bookId}`}>
-            {cell.getValue()}
-          </Link>
+          <DynamicTextWrapper className="max-w-[10rem]">
+            <Link href={`/books/${cell.row.original.bookId}`}>
+              {cell.renderValue()}
+            </Link>
+          </DynamicTextWrapper>
         ),
+        maxSize: 10,
       }),
       columnHelper.accessor("book.authors", {
         header: () => <span>Kirjailija</span>,
+        cell: (cell) => (
+          <DynamicTextWrapper className="max-w-[10rem]">
+            {cell.renderValue()}
+          </DynamicTextWrapper>
+        ),
       }),
       columnHelper.accessor("book.reviews", {
         header: () => <span>Arvostelu</span>,
