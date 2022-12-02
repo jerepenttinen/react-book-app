@@ -1,6 +1,10 @@
+import { Dialog } from "@headlessui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type SavedBook } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   IoHomeOutline,
   IoHome,
@@ -11,6 +15,9 @@ import {
   IoNotificationsOutline,
   IoNotifications,
 } from "react-icons/io5";
+import { type z } from "zod";
+import { useDialog } from "~/pages/users/[userId]/library";
+import { createProgressUpdateValidator } from "~/server/common/books-validators";
 import { trpc } from "~/utils/trpc";
 import BookCover from "./BookCover";
 import { Divider } from "./Divider";
@@ -55,7 +62,7 @@ function NotificationsLink() {
     >
       <div className="indicator">
         <span
-          className={`badge-error badge badge-xs indicator-item ${
+          className={`badge badge-error badge-xs indicator-item ${
             notificationCountData ? "" : "hidden"
           }`}
         >
@@ -78,82 +85,160 @@ function Sidebar() {
     },
   );
 
+  const [book, setBook, modalIsOpen, closeModal] = useDialog<SavedBook>();
+
   return (
-    <div className="drawer-side text-lg">
-      <label htmlFor="my-drawer" className="drawer-overlay"></label>
-      <ul className="menu w-72 bg-base-300">
-        <li>
-          <IconLink
-            href="/"
-            icon={<IoHomeOutline />}
-            hoverIcon={<IoHome />}
-            text="Koti"
-          />
-        </li>
-        {!!session.data?.user ? (
-          <>
-            <li>
-              <IconLink
-                href={`/users/${session.data?.user?.id}/library`}
-                icon={<IoLibraryOutline />}
-                hoverIcon={<IoLibrary />}
-                text="Kirjasto"
-              />
-            </li>
-            <li>
-              <IconLink
-                href="/friends"
-                icon={<IoPeopleOutline />}
-                hoverIcon={<IoPeople />}
-                text="Kaverit"
-              />
-            </li>
-            <li>
-              <NotificationsLink />
-            </li>
-          </>
-        ) : (
-          <></>
-        )}
-        <div className="visible mx-4 mt-4 mb-2 lg:hidden">
-          <Searchbar />
-        </div>
-        {readingBooksData && readingBooksData.length > 0 && (
-          <>
-            <section className="mb-8 mt-6 flex flex-col gap-8 px-4">
-              <Divider />
-              <span className="text-lg font-bold">Parhaillaan lukemassa</span>
-              {readingBooksData.map((savedBook) => (
-                <div key={savedBook.id} className="flex h-min flex-row gap-4">
-                  <BookCover
-                    book={savedBook.book}
-                    size="s"
-                    key={savedBook.id + "sidecover"}
-                  />
-                  <div className="flex w-3/4 flex-col gap-1 p-0">
-                    <Link
-                      href={`/books/${savedBook.bookId}`}
-                      className="font-bold"
-                    >
-                      {savedBook.book.name}
-                    </Link>
-                    <span className="text-sm">
-                      {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
-                    </span>
-                    <button
-                      type="button"
-                      className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
-                    >
-                      Päivitä
-                    </button>
+    <>
+      <div className="drawer-side text-lg">
+        <label htmlFor="my-drawer" className="drawer-overlay"></label>
+        <ul className="menu w-72 bg-base-300">
+          <li>
+            <IconLink
+              href="/"
+              icon={<IoHomeOutline />}
+              hoverIcon={<IoHome />}
+              text="Koti"
+            />
+          </li>
+          {!!session.data?.user ? (
+            <>
+              <li>
+                <IconLink
+                  href={`/users/${session.data?.user?.id}/library`}
+                  icon={<IoLibraryOutline />}
+                  hoverIcon={<IoLibrary />}
+                  text="Kirjasto"
+                />
+              </li>
+              <li>
+                <IconLink
+                  href="/friends"
+                  icon={<IoPeopleOutline />}
+                  hoverIcon={<IoPeople />}
+                  text="Kaverit"
+                />
+              </li>
+              <li>
+                <NotificationsLink />
+              </li>
+            </>
+          ) : (
+            <></>
+          )}
+          <div className="visible mx-4 mt-4 mb-2 lg:hidden">
+            <Searchbar />
+          </div>
+          {readingBooksData && readingBooksData.length > 0 && (
+            <>
+              <section className="mb-8 mt-6 flex flex-col gap-8 px-4">
+                <Divider />
+                <span className="text-lg font-bold">Parhaillaan lukemassa</span>
+                {readingBooksData.map((savedBook) => (
+                  <div key={savedBook.id} className="flex h-min flex-row gap-4">
+                    <BookCover
+                      book={savedBook.book}
+                      size="s"
+                      key={savedBook.id + "sidecover"}
+                    />
+                    <div className="flex w-3/4 flex-col gap-1 p-0">
+                      <Link
+                        href={`/books/${savedBook.bookId}`}
+                        className="font-bold"
+                      >
+                        {savedBook.book.name}
+                      </Link>
+                      <span className="text-sm">
+                        {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+                      </span>
+                      <button
+                        type="button"
+                        className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
+                        onClick={() => setBook(savedBook)}
+                      >
+                        Päivitä
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </section>
-          </>
-        )}
-      </ul>
-    </div>
+                ))}
+              </section>
+            </>
+          )}
+        </ul>
+      </div>
+      {!!book ? (
+        <UpdateProgressModal
+          book={book}
+          open={modalIsOpen}
+          close={closeModal}
+        />
+      ) : null}
+    </>
+  );
+}
+
+function UpdateProgressModal({
+  book,
+  open,
+  close,
+}: {
+  book: SavedBook;
+  open: boolean;
+  close: () => void;
+}) {
+  // Tähän viimeisimmän päivityksen haku
+
+  // Mutaatiot päivitä ja olen valmis
+
+  const { register, handleSubmit, reset } = useForm<
+    z.infer<typeof createProgressUpdateValidator>
+  >({
+    resolver: zodResolver(createProgressUpdateValidator),
+  });
+
+  return (
+    <Dialog as="div" className="modal modal-open" open={open} onClose={close}>
+      <Dialog.Panel
+        as="form"
+        onSubmit={handleSubmit((data) => alert(JSON.stringify(data)))}
+        className="modal-box flex flex-col gap-4 border border-base-content border-opacity-20"
+      >
+        <input type="hidden" value={book.id} {...register("savedBookId")} />
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-row items-center gap-2">
+            <span>Sivu</span>
+            <input
+              size={3}
+              className="input text-right"
+              type="number"
+              min={0}
+              {...register("progress")}
+            />
+            <span>/</span>
+            <span>{undefined ?? 1}</span>
+          </div>
+          <input type="button" className="btn-ghost btn" value="Olen valmis" />
+        </div>
+        <textarea
+          className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
+          rows={4}
+          placeholder="Päivitys teksti tähän"
+          {...register("content")}
+        ></textarea>
+        <div className="flex flex-row justify-end gap-4">
+          <input
+            type="button"
+            className="btn-ghost btn"
+            value="Peruuta"
+            onClick={close}
+          />
+          <input
+            type="submit"
+            className="btn bordered w-min border-medium px-8 hover:border-medium/50"
+            value="Päivitä"
+          />
+        </div>
+      </Dialog.Panel>
+    </Dialog>
   );
 }
 

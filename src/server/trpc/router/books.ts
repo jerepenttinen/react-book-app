@@ -6,7 +6,10 @@ import type { BooksData, BookData } from "~/server/googlebooks/book-types";
 import { TRPCError } from "@trpc/server";
 import { type Context } from "../context";
 import { formatTitle } from "~/components/SearchResult";
-import { createReviewValidator } from "~/server/common/books-validators";
+import {
+  createProgressUpdateValidator,
+  createReviewValidator,
+} from "~/server/common/books-validators";
 
 const selectSafeUser = {
   id: true,
@@ -226,6 +229,18 @@ export const booksRouter = router({
         take: input.bookCount,
         include: {
           book: true,
+        },
+      });
+    }),
+  createProgressUpdate: protectedProcedure
+    .input(createProgressUpdateValidator)
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.update.create({
+        data: {
+          savedBookId: input.savedBookId,
+          progress: input.progress,
+          content: input.content,
+          userId: ctx.session.user.id,
         },
       });
     }),

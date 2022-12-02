@@ -29,16 +29,16 @@ const shelves = new Map<string, string>([
   ["read", "Luettu"],
 ]);
 
-function useBookDialog(
-  book: Book | undefined = undefined,
-): [Book | undefined, (book: Book) => void, boolean, () => void] {
-  const [targetBook, setTargetBook] = useState<Book | undefined>(book);
+export function useDialog<T>(
+  t: T | undefined = undefined,
+): [T | undefined, (n: T) => void, boolean, () => void] {
+  const [target, setTarget] = useState<T | undefined>(t);
 
   return [
-    targetBook,
-    (book: Book) => setTargetBook(book),
-    targetBook !== undefined, // isOpen
-    () => setTargetBook(undefined), // close
+    target,
+    (n: T) => setTarget(n),
+    target !== undefined, // isOpen
+    () => setTarget(undefined), // close
   ];
 }
 
@@ -70,7 +70,7 @@ const LibraryPage: NextPage = () => {
   const trpcContext = trpc.useContext();
   const updateSavedBook = trpc.books.updateSavedBook.useMutation();
 
-  const [book, setBook, modalIsOpen, closeModal] = useBookDialog();
+  const [book, setBook, modalIsOpen, closeModal] = useDialog<Book>();
 
   const columns = useMemo(
     () => [
