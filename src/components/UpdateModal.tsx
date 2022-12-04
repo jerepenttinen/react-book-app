@@ -1,31 +1,39 @@
 import { useState } from 'react';
 
-// Usage: <UpdateModal onNewUpdate={console.log} currentPage={3} totalPages={100} />
-function UpdateModal({
-    currentPage,    // Current page number.
-    totalPages,     // Total number of pages in the book.
-    shown,          // Is modal visible? (true/false) value, default true.
-    onNewUpdate,    // Callback that takes an object with keys updateText and pageNumber.
-                    // E.g. { updateText: "made it to page 5", pageNumber: "5" }
-    onCancel,       // Callback that handles Cancel. Default behavior is to hide modal.
-    onDone          // Callback that handles Olen valmis. Default behavior is to hide modal.
-})
+interface UpdateModalParameters
 {
-    let [isShown, setShown] = useState(shown ?? true);
+    onNewUpdate: (data: UpdateModalUserInput) => any, // Callback that handles new update.
+    currentPage?: number,    // Current page number.
+    totalPages?: number,     // Total number of pages in the book.
+    shown?: boolean,         // Is modal visible? Default true.
+    onCancel?: any,          // Callback that handles Cancel. Default behavior is to hide modal.
+    onDone?: any             // Callback that handles Olen valmis. Default behavior is to hide modal.
+}
 
-    currentPage ??= 1;
-    totalPages ??= 1;
-    onCancel ??= setShown.bind(this, false);
-    onDone ??= setShown.bind(this, false);
+export interface UpdateModalUserInput
+{
+    updateText: string,
+    pageNumber: number
+}
 
-    function onFormSubmit(e)
+// Usage: <UpdateModal onNewUpdate={console.log} currentPage={3} totalPages={100} />
+export function UpdateModal(params: UpdateModalParameters): JSX.Element | null
+{
+    let [isShown, setShown] = useState(params.shown ?? true);
+
+    let currentPage = params.currentPage ?? 1;
+    let totalPages  = params.totalPages ?? 1;
+    let onCancel    = params.onCancel ?? setShown.bind(this, false);
+    let onDone      = params.onDone ?? setShown.bind(this, false);
+
+    function onFormSubmit(e: any)
     {
         e.preventDefault();
-        if (onNewUpdate instanceof Function)
+        if (params.onNewUpdate instanceof Function)
         {
             const formData = new FormData(e.target);
-            const obj = Object.fromEntries(formData);
-            onNewUpdate(obj);
+            const obj: UpdateModalUserInput = Object.fromEntries(formData);
+            params.onNewUpdate(obj);
         }
         else
         {
@@ -54,5 +62,3 @@ function UpdateModal({
     </form>
     </div>);
 }
-
-export default UpdateModal;
