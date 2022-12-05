@@ -223,10 +223,10 @@ function UpdateProgressModal({
 	});
 
 	useEffect(() => {
-		setFocus("progress", { shouldSelect: true });
 		reset({
 			progress: lastUpdateData?.progress,
 		});
+		setTimeout(() => setFocus("progress", { shouldSelect: true }), 0);
 	}, [lastUpdateData, reset, setFocus]);
 
 	if (updateIsLoading) {
