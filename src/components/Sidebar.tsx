@@ -2,7 +2,7 @@ import { Dialog } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
 	IoHome,
@@ -17,6 +17,7 @@ import {
 import { type z } from "zod";
 import { useDialog } from "~/pages/users/[userId]/library";
 import { createProgressUpdateValidator } from "~/server/common/books-validators";
+import { formatBookProgress } from "~/utils/format-book-progress";
 import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "./BookCover";
 import { Divider } from "./Divider";
@@ -133,34 +134,46 @@ function Sidebar() {
 							<section className="mb-8 mt-6 flex flex-col gap-8 px-4">
 								<Divider />
 								<span className="text-lg font-bold">Parhaillaan lukemassa</span>
-								{readingBooksData.map((savedBook) => (
-									<div key={savedBook.id} className="flex h-min flex-row gap-4">
-										<BookCover
-											book={savedBook.book}
-											size="s"
-											key={savedBook.id + "sidecover"}
-										/>
-										<div className="flex w-3/4 flex-col gap-1 p-0">
-											<Link
-												href={`/books/${savedBook.bookId}`}
-												className="font-bold"
-											>
-												{savedBook.book.name}
-											</Link>
-											<span className="text-sm">
-												{savedBook.book.authors ?? "Tuntematon kirjoittaja"}
-											</span>
-											<button
-												type="button"
-												className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
-												onClick={() =>
-													setBook(savedBook)}
-											>
-												Päivitä
-											</button>
+								{readingBooksData.map((savedBook) => {
+									const update = savedBook.updates?.at(0);
+									return (
+										<div
+											key={savedBook.id}
+											className="flex h-min flex-row gap-4"
+										>
+											<BookCover
+												book={savedBook.book}
+												size="s"
+												key={savedBook.id + "sidecover"}
+											/>
+											<div className="flex w-3/4 flex-col gap-1 p-0">
+												<Link
+													href={`/books/${savedBook.bookId}`}
+													className="font-bold"
+												>
+													{savedBook.book.name}
+												</Link>
+												<span className="text-sm">
+													{savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+												</span>
+												{!!update
+													? (
+														<span className="text-sm">
+															{formatBookProgress(update, savedBook.book.pageCount)}
+														</span>
+													)
+													: null}
+												<button
+													type="button"
+													className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
+													onClick={() => setBook(savedBook)}
+												>
+													Päivitä
+												</button>
+											</div>
 										</div>
-									</div>
-								))}
+									);
+								})}
 							</section>
 						</>
 					)}
@@ -188,7 +201,7 @@ function UpdateProgressModal({
 	open: boolean;
 	close: () => void;
 }) {
-	// Tähän viimeisimmän päivityksen haku
+	const trpcContext = trpc.useContext();
 	const { data: lastUpdateData, isLoading: updateIsLoading } = trpc.books
 		.getMyLastProgressUpdateForBook.useQuery(
 			{
@@ -226,6 +239,7 @@ function UpdateProgressModal({
 				as="form"
 				onSubmit={handleSubmit(async (data) => {
 					await createProgressUpdateMutation.mutateAsync(data);
+					trpcContext.books.getReadingBooks.invalidate();
 					close();
 				})}
 				className="modal-box flex flex-col gap-4 border border-base-content border-opacity-20"

@@ -152,6 +152,12 @@ export const booksRouter = router({
         },
         include: {
           book: true,
+					updates: {
+						orderBy: {
+							createdAt: "desc",
+						},
+						take: 1,
+					},
         },
       });
     }),

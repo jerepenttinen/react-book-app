@@ -15,6 +15,7 @@ import { type z } from "zod";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
+import { formatBookProgress } from "~/utils/format-book-progress";
 
 function EditProfileModal(props: {
   userData: RouterTypes["users"]["getById"]["output"];
@@ -63,8 +64,8 @@ function EditProfileModal(props: {
           <ErrorMessage
             errors={formState.errors}
             name="location"
-						as="p"
-						className="text-error"
+            as="p"
+            className="text-error"
           />
         </div>
         <div className="form-control">
@@ -81,8 +82,8 @@ function EditProfileModal(props: {
           <ErrorMessage
             errors={formState.errors}
             name="biography"
-						as="p"
-						className="text-error"
+            as="p"
+            className="text-error"
           />
         </div>
         <div className="flex flex-row justify-end gap-4">
@@ -272,27 +273,32 @@ function ReadingBooks({ userId }: { userId: string }) {
         <section className="flex flex-col gap-4">
           <span className="font-bold">Parhaillaan lukemassa</span>
           <div className="flex flex-col gap-8">
-            {readingBooksData.map((savedBook) => (
-              <div key={savedBook.id} className="flex h-min flex-row gap-4">
-                <BookCover
-                  book={savedBook.book}
-                  size="s"
-                  key={savedBook.id + "sidecover"}
-                />
-                <div className="flex w-3/5 flex-col gap-1 p-0">
-                  <Link
-                    href={`/books/${savedBook.bookId}`}
-                    className="font-bold"
-                  >
-                    {savedBook.book.name}
-                  </Link>
-                  <span>
-                    {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
-                  </span>
-                  <span>Sivulla X/Y (Z%)</span>
+            {readingBooksData.map((savedBook) => {
+              const update = savedBook.updates?.at(0);
+              return (
+                <div key={savedBook.id} className="flex h-min flex-row gap-4">
+                  <BookCover
+                    book={savedBook.book}
+                    size="s"
+                    key={savedBook.id + "sidecover"}
+                  />
+                  <div className="flex w-3/5 flex-col gap-1 p-0">
+                    <Link
+                      href={`/books/${savedBook.bookId}`}
+                      className="font-bold"
+                    >
+                      {savedBook.book.name}
+                    </Link>
+                    <span>
+                      {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
+                    </span>
+                    <span>
+                      {formatBookProgress(update, savedBook.book.pageCount)}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
