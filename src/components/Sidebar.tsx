@@ -216,18 +216,18 @@ function UpdateProgressModal({
 	const createProgressUpdateMutation = trpc.books.createProgressUpdate
 		.useMutation();
 
-	const { register, handleSubmit, reset, setFocus } = useForm<
+	const { register, handleSubmit, setFocus, setValue } = useForm<
 		z.infer<typeof createProgressUpdateValidator>
 	>({
 		resolver: zodResolver(createProgressUpdateValidator),
 	});
 
 	useEffect(() => {
-		reset({
-			progress: lastUpdateData?.progress,
-		});
-		setTimeout(() => setFocus("progress", { shouldSelect: true }), 0);
-	}, [lastUpdateData, reset, setFocus]);
+		if (lastUpdateData?.progress !== undefined) {
+			setValue("progress", lastUpdateData.progress);
+			setFocus("progress", { shouldSelect: true });
+		}
+	}, [lastUpdateData, setValue, setFocus]);
 
 	if (updateIsLoading) {
 		return null;

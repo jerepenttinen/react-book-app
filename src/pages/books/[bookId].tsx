@@ -94,15 +94,16 @@ function CreateReview(props: CreateReviewProps) {
     onSuccess: () => trpcContext.books.getBookReviews.invalidate(),
   });
 
-  const { register, handleSubmit, formState, control, reset } = useForm<
+  const { register, handleSubmit, formState, control, setValue } = useForm<
     z.infer<typeof createReviewValidator>
   >({
     resolver: zodResolver(createReviewValidator),
   });
 
   useEffect(() => {
-    reset(myReview ?? { score: 0, content: "" });
-  }, [reset, myReview, props.bookId]);
+		setValue("score", myReview?.score ?? 0);
+		setValue("content", myReview?.content ?? "");
+  }, [setValue, myReview, props.bookId]);
 
   if (!session.data || isLoading) {
     return null;
