@@ -1,6 +1,7 @@
 import { type Notification } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { editProfileValidator } from "~/server/common/users-validators";
 import { FriendshipStatus } from "~/types/friendship-status";
 import { type Context } from "../context";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
@@ -213,6 +214,19 @@ export const usersRouter = router({
       },
     });
   }),
+	updateMyProfile: protectedProcedure
+	.input(editProfileValidator)
+	.mutation(({ctx, input}) => {
+		return ctx.prisma.user.update({
+			where: {
+				id: ctx.session.user.id,
+			},
+			data:  {
+				biography: input.biography,
+				location: input.location,
+			}
+		});
+	}),
 });
 
 async function acceptFriendRequest(ctx: Context, notification: Notification) {

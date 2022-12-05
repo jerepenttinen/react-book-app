@@ -1,22 +1,122 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import Avatar from "~/components/Avatar";
-import { trpc } from "~/utils/trpc";
+import { type RouterTypes, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
 import { IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
 import { useSession } from "next-auth/react";
 import { FriendshipStatus } from "~/types/friendship-status";
 import { formatDate } from "~/utils/format-date";
+import { Dialog } from "@headlessui/react";
+import { editProfileValidator } from "~/server/common/users-validators";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type z } from "zod";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { ErrorMessage } from "@hookform/error-message";
 
-function AddFriendButton(props: { userId: string }) {
+function EditProfileModal(props: {
+  userData: RouterTypes["users"]["getById"]["output"];
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const trpcContext = trpc.useContext();
+  const updateProfileMutation = trpc.users.updateMyProfile.useMutation();
+
+  const { register, handleSubmit, reset, formState } = useForm<
+    z.infer<typeof editProfileValidator>
+  >({
+    defaultValues: {
+      biography: props.userData.biography ?? undefined,
+      location: props.userData.location ?? undefined,
+    },
+    resolver: zodResolver(editProfileValidator),
+  });
+
+  useEffect(() => {
+    reset({
+      biography: props.userData.biography ?? undefined,
+      location: props.userData.location ?? undefined,
+    });
+  }, [props.userData, reset]);
+
+  return (
+    <Dialog
+      as="div"
+      className="modal modal-open"
+      open={props.isOpen}
+      onClose={() => props.setIsOpen(false)}
+    >
+      <Dialog.Panel
+        as="form"
+        onSubmit={handleSubmit(async (data) => {
+          await updateProfileMutation.mutateAsync(data);
+          trpcContext.users.getById.invalidate();
+          props.setIsOpen(false);
+        })}
+        className="modal-box flex flex-col gap-4 border border-base-content border-opacity-20"
+      >
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Sijainti</span>
+          </label>
+          <input
+            type="text"
+            className="input-bordered input border-medium text-lg text-base-content placeholder:text-medium"
+            placeholder="Sijainti tähän"
+            {...register("location")}
+          />
+          <ErrorMessage
+            errors={formState.errors}
+            name="location"
+						as="p"
+						className="text-error"
+          />
+        </div>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Biografia</span>
+          </label>
+          <textarea
+            className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
+            rows={4}
+            placeholder="Biografia teksti tähän"
+            {...register("biography")}
+          >
+          </textarea>
+          <ErrorMessage
+            errors={formState.errors}
+            name="biography"
+						as="p"
+						className="text-error"
+          />
+        </div>
+        <div className="flex flex-row justify-end gap-4">
+          <input
+            type="button"
+            className="btn-ghost btn"
+            value="Peruuta"
+            onClick={() => props.setIsOpen(false)}
+          />
+          <input type="submit" className="btn-success btn" value="Päivitä" />
+        </div>
+      </Dialog.Panel>
+    </Dialog>
+  );
+}
+
+function AddFriendButton(props: {
+  userData: RouterTypes["users"]["getById"]["output"];
+}) {
   const session = useSession();
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();
   const trpcContext = trpc.useContext();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: friendStatus } = trpc.users.getFriendshipStatus.useQuery(
     {
-      userId: props.userId,
+      userId: props.userData.id,
     },
     {
       enabled: !!session.data?.user,
@@ -28,11 +128,21 @@ function AddFriendButton(props: { userId: string }) {
     return null;
   }
 
-  if (session.data?.user.id === props.userId) {
+  if (session.data?.user.id === props.userData.id) {
     return (
-      <button className="btn-primary btn-lg btn rounded-full">
-        Muokkaa profiilia
-      </button>
+      <>
+        <button
+          className="btn-primary btn-lg btn rounded-full"
+          onClick={() => setIsEditModalOpen(true)}
+        >
+          Muokkaa profiilia
+        </button>
+        <EditProfileModal
+          userData={props.userData}
+          isOpen={isEditModalOpen}
+          setIsOpen={setIsEditModalOpen}
+        />
+      </>
     );
   }
 
@@ -50,7 +160,7 @@ function AddFriendButton(props: { userId: string }) {
           onClick={() => {
             addFriendMutation.mutate(
               {
-                targetUserId: props.userId,
+                targetUserId: props.userData.id,
               },
               {
                 onSuccess: () =>
@@ -132,22 +242,22 @@ function FavoriteBooks(props: { userId: string }) {
 
   return (
     <>
-      {!!favoriteData && favoriteData.length > 0 ? (
-        <section className="flex flex-col gap-4">
-          <span className="text-lg font-bold">Lempi kirjat</span>
-          <div className="flex flex-row gap-4">
-            {favoriteData?.map((review) => (
-              <BookCover
-                key={"favorite" + review.id}
-                book={review.book}
-                size="s"
-              />
-            ))}
-          </div>
-        </section>
-      ) : (
-        <></>
-      )}
+      {!!favoriteData && favoriteData.length > 0
+        ? (
+          <section className="flex flex-col gap-4">
+            <span className="text-lg font-bold">Lempi kirjat</span>
+            <div className="flex flex-row gap-4">
+              {favoriteData?.map((review) => (
+                <BookCover
+                  key={"favorite" + review.id}
+                  book={review.book}
+                  size="s"
+                />
+              ))}
+            </div>
+          </section>
+        )
+        : <></>}
     </>
   );
 }
@@ -240,7 +350,7 @@ const UserPage: NextPage = () => {
     <div className="flex flex-col gap-8">
       <section className="flex flex-row items-end justify-between">
         <Avatar user={userData} size="l" />
-        <AddFriendButton userId={userData.id} />
+        <AddFriendButton userData={userData} />
       </section>
 
       <section className="flex flex-col gap-4">
@@ -249,23 +359,23 @@ const UserPage: NextPage = () => {
         {userData.biography ? <span>{userData.biography}</span> : <></>}
 
         <div className="flex flex-row gap-4 text-medium">
-          {userData.location ? (
-            <div className="inline-flex gap-1">
-              <IoLocationOutline size={24} />
-              <span>{userData.location}</span>
-            </div>
-          ) : (
-            <></>
-          )}
+          {userData.location
+            ? (
+              <div className="inline-flex gap-1">
+                <IoLocationOutline size={24} />
+                <span>{userData.location}</span>
+              </div>
+            )
+            : <></>}
 
-          {userData.createdAt ? (
-            <div className="inline-flex gap-1">
-              <IoCalendarOutline size={24} />
-              <span>Liittyi {formatDate(userData.createdAt)}</span>
-            </div>
-          ) : (
-            <></>
-          )}
+          {userData.createdAt
+            ? (
+              <div className="inline-flex gap-1">
+                <IoCalendarOutline size={24} />
+                <span>Liittyi {formatDate(userData.createdAt)}</span>
+              </div>
+            )
+            : <></>}
         </div>
       </section>
 
