@@ -8,7 +8,7 @@ import { Popover, RadioGroup } from "@headlessui/react";
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Avatar from "~/components/Avatar";
 import BookCover from "~/components/BookCover";
 import { Stars } from "~/components/Stars";
@@ -86,6 +86,7 @@ function CreateReview(props: CreateReviewProps) {
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+			suspense: true,
     },
   );
 
@@ -130,7 +131,7 @@ function CreateReview(props: CreateReviewProps) {
         name="score"
         render={({ field }) => (
           <RadioGroup
-            value={field.value}
+            defaultValue={field.value}
             onChange={field.onChange}
             className="rating rating-lg rating-half my-0 h-10"
           >
@@ -468,11 +469,11 @@ const BookPage: NextPage = () => {
     <div className="flex flex-col gap-8">
       <BookInfo bookId={bookId} />
       {session.data ? (
-        <>
+        <Suspense>
           <Divider />
           <span className="font-bold">Kerro muille mitä pidit kirjasta</span>
           <CreateReview bookId={bookId} />
-        </>
+        </Suspense>
       ) : (
         <></>
       )}
