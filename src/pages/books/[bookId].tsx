@@ -377,6 +377,7 @@ function BookInfo({ bookId }: BookInfoProps) {
     {
       enabled: !!bookId,
       retry: 0,
+			suspense: true,
     },
   );
 
@@ -467,18 +468,18 @@ const BookPage: NextPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <BookInfo bookId={bookId} />
-      {session.data ? (
-        <Suspense>
-          <Divider />
-          <span className="font-bold">Kerro muille mitä pidit kirjasta</span>
-          <CreateReview bookId={bookId} />
-        </Suspense>
-      ) : (
-        <></>
-      )}
-      <Divider />
-      <ReviewSection bookId={bookId} />
+			<Suspense fallback={<p>Ladataan...</p>}>
+				<BookInfo bookId={bookId} />
+				{session.data ? (
+					<Suspense>
+						<Divider />
+						<span className="font-bold">Kerro muille mitä pidit kirjasta</span>
+						<CreateReview bookId={bookId} />
+					</Suspense>
+				) : null}
+				<Divider />
+				<ReviewSection bookId={bookId} />
+			</Suspense>
     </div>
   );
 };
