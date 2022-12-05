@@ -13,7 +13,7 @@ import { editProfileValidator } from "~/server/common/users-validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type z } from "zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 
 function EditProfileModal(props: {
@@ -24,7 +24,7 @@ function EditProfileModal(props: {
   const trpcContext = trpc.useContext();
   const updateProfileMutation = trpc.users.updateMyProfile.useMutation();
 
-  const { register, handleSubmit, reset, formState } = useForm<
+  const { register, handleSubmit, formState } = useForm<
     z.infer<typeof editProfileValidator>
   >({
     defaultValues: {
@@ -33,13 +33,6 @@ function EditProfileModal(props: {
     },
     resolver: zodResolver(editProfileValidator),
   });
-
-  useEffect(() => {
-    reset({
-      biography: props.userData.biography ?? undefined,
-      location: props.userData.location ?? undefined,
-    });
-  }, [props.userData, reset]);
 
   return (
     <Dialog
