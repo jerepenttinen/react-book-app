@@ -1,8 +1,8 @@
 import { z } from "zod";
 import got from "got";
 import { BooksQuery } from "~/server/googlebooks/query";
-import { router, publicProcedure, protectedProcedure } from "../trpc";
-import type { BooksData, BookData } from "~/server/googlebooks/book-types";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
+import type { BookData, BooksData } from "~/server/googlebooks/book-types";
 import { TRPCError } from "@trpc/server";
 import { type Context } from "../context";
 import { formatTitle } from "~/components/SearchResult";
@@ -10,6 +10,7 @@ import {
   createProgressUpdateValidator,
   createReviewValidator,
 } from "~/server/common/books-validators";
+import { Prisma } from "@prisma/client";
 
 const selectSafeUser = {
   id: true,
@@ -152,12 +153,12 @@ export const booksRouter = router({
         },
         include: {
           book: true,
-					updates: {
-						orderBy: {
-							createdAt: "desc",
-						},
-						take: 1,
-					},
+          updates: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
         },
       });
     }),
@@ -250,19 +251,55 @@ export const booksRouter = router({
         },
       });
     }),
-	getMyLastProgressUpdateForBook: protectedProcedure
-		.input(z.object({ savedBookId: z.string() }))
-		.query(({ ctx, input }) => {
-			return ctx.prisma.update.findFirst({
-				where: {
-					userId: ctx.session.user.id,
-					savedBookId: input.savedBookId,
-				},
-				orderBy: {
-					createdAt: "desc",
-				},
-			});
-		}),
+  getMyLastProgressUpdateForBook: protectedProcedure
+    .input(z.object({ savedBookId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.update.findFirst({
+        where: {
+          userId: ctx.session.user.id,
+          savedBookId: input.savedBookId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }),
+  getHomePageUpdates: publicProcedure.query(async ({ ctx }) => {
+    const result = await ctx.prisma.$queryRaw(
+      Prisma
+        .sql`with json_by_user_savedbook as (select json_object('user', json_object('id', S.id,
+																																'name', S.name,
+																																'image', S.image),
+																						'book', json_object('id', B.id,
+																																'name', B.name,
+																																'authors', B.authors,
+																																'pageCount', B.pageCount,
+																																'thumbnailUrl', B.thumbnailUrl,
+																																'createdAt', B.createdAt
+																								),
+																						'updates', json_group_array(json_object('id', D.id,
+																																										'content', content,
+																																										'progress', progress,
+																																										'createdAt', D.createdAt))) as update_group_obj
+
+												 from "Update" D
+																	join User S on S.id = D.userId
+																	join SavedBook SB on D.savedBookId = SB.id
+																	join Book B on SB.bookId = B.id
+												 group by D.userid, savedBookId
+												 limit 10)
+
+select json_group_array(json(update_group_obj)) as result
+from json_by_user_savedbook;`,
+    );
+
+    const r = result as { result: string }[];
+    if (r.length === 0 || r[0] === undefined || r[0].result === undefined) {
+      return undefined;
+    }
+
+    return homepageValidator.parse(JSON.parse(r[0].result));
+  }),
 });
 
 async function loadBookToDatabase(ctx: Context, bookId: string) {
@@ -282,7 +319,7 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
           name: formatTitle(googleBook),
           authors: googleBook.volumeInfo.authors?.join(", "),
           thumbnailUrl: googleBook.volumeInfo.imageLinks?.thumbnail,
-					pageCount: googleBook.volumeInfo.pageCount,
+          pageCount: googleBook.volumeInfo.pageCount,
         },
       });
     } else {
@@ -291,3 +328,29 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
   }
   return book;
 }
+
+const homepageValidator = z.array(
+  z.object({
+    user: z.object({
+      id: z.string(),
+      name: z.string().optional(),
+      image: z.string().optional(),
+    }),
+    book: z.object({
+      id: z.string(),
+      name: z.string().optional(),
+      authors: z.string().optional(),
+      thumbnailUrl: z.string().optional(),
+      pageCount: z.number().optional(),
+			createdAt: z.number().transform((a) => new Date(a)),
+    }),
+    updates: z.array(
+      z.object({
+        id: z.string(),
+        createdAt: z.number().transform((a) => new Date(a)),
+        progress: z.number(),
+        content: z.string(),
+      }),
+    ),
+  }),
+);

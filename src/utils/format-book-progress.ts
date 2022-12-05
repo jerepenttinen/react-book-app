@@ -1,7 +1,5 @@
-import type { Update } from "@prisma/client";
-
 export function formatBookProgress(
-	update: Update | undefined | null,
+	update: { progress: number } | undefined | null,
 	pageCount: number | undefined | null,
 ) {
 	if (!update) {
