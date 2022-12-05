@@ -469,7 +469,7 @@ const BookPage: NextPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-			<Suspense fallback={<p>Ladataan...</p>}>
+			<Suspense key={bookId} fallback={<p>Ladataan...</p>}>
 				<BookInfo bookId={bookId} />
 				{session.data ? (
 					<Suspense>
