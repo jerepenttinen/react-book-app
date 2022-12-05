@@ -27,7 +27,7 @@ function Avatar(props: AvatarProps) {
   return (
     <div className={`avatar ${!props.user.image && "placeholder"}`}>
       <div
-        className={`rounded-full ${w} ${h} bg-accent text-accent-content ${fontSize}`}
+        className={`rounded-full ${w} ${h} ${!!props.user.image ? "" : "bg-accent"} text-accent-content ${fontSize}`}
       >
         {props.user.image ? (
           <Image

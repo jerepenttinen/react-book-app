@@ -12,19 +12,7 @@ interface BookCoverProps {
   withoutLink?: boolean;
 }
 
-const sizes = {
-  s: {
-    width: 64,
-    height: 96,
-    tw: "w-16",
-    th: "h-24",
-  },
-  l: {
-    width: 128,
-    height: 192,
-    tw: "w-32",
-    th: "h-48",
-  },
+const sizes = { s: { width: 64, height: 96, tw: "w-16", th: "h-24", }, l: { width: 128, height: 192, tw: "w-32", th: "h-48", },
 };
 
 function isBookType(book: BookData | Book): book is Book {
