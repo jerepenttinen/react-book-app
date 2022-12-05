@@ -244,6 +244,19 @@ export const booksRouter = router({
         },
       });
     }),
+	getMyLastProgressUpdateForBook: protectedProcedure
+		.input(z.object({ savedBookId: z.string() }))
+		.query(({ ctx, input }) => {
+			return ctx.prisma.update.findFirst({
+				where: {
+					userId: ctx.session.user.id,
+					savedBookId: input.savedBookId,
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+			});
+		}),
 });
 
 async function loadBookToDatabase(ctx: Context, bookId: string) {
@@ -263,6 +276,7 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
           name: formatTitle(googleBook),
           authors: googleBook.volumeInfo.authors?.join(", "),
           thumbnailUrl: googleBook.volumeInfo.imageLinks?.thumbnail,
+					pageCount: googleBook.volumeInfo.pageCount,
         },
       });
     } else {
