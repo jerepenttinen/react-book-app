@@ -18,18 +18,21 @@ const Home: NextPage = () => {
       {data?.map((a) => (
         <div key={a.user.id + a.book.id} className="flex flex-col gap-4">
           <div>
-						<Avatar user={a.user} size="m" />
-					</div>
+            <Avatar user={a.user} size="m" />
+          </div>
           <div>
-						<BookCover book={a.book as unknown as Book} size="s" />
-					</div>
+            <BookCover book={a.book as unknown as Book} size="s" />
+          </div>
           <ul className="steps steps-vertical">
-						{a.updates.map(update => (
-							<li key={update.id} className="step step-primary">
-								<div>{formatDate(update.createdAt)} {formatBookProgress(update, a.book.pageCount)}</div>
-							</li>
-						))}
-					</ul>
+            {a.updates.map((update) => (
+              <li key={update.id} className="step-primary step">
+                <div>
+                  {formatDate(update.createdAt)}{" "}
+                  {formatBookProgress(update, a.book.pageCount)}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       ))}
     </div>
