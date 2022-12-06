@@ -1,8 +1,7 @@
-import { type Book } from "@prisma/client";
 import { type NextPage } from "next";
 import Link from "next/link";
 import Avatar from "~/components/Avatar";
-import UpdateBlock from "~/components/UpdateBlock";
+import { Update } from "~/components/UpdateBlock";
 import { trpc } from "~/utils/trpc";
 
 const Home: NextPage = () => {
@@ -12,9 +11,20 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {data?.map((a) => (
-				<UpdateBlock updateBlock={a} />
+    <div className="flex flex-col gap-16">
+      {data?.map((block) => (
+				<section
+					key={block.user.id + block.book.id}
+					className="flex flex-col gap-4"
+				>
+					<div className="flex flex-row gap-4">
+						<Avatar user={block.user} size="m" />
+						<div className="flex flex-col gap-4">
+							<Link href={`/users/${block.user.id}`} className="font-bold">{block.user.name}</Link>
+							<Update book={block.book} updates={block.updates} />
+						</div>
+					</div>
+				</section>
       ))}
     </div>
   );

@@ -267,27 +267,28 @@ export const booksRouter = router({
   getHomePageUpdates: publicProcedure.query(async ({ ctx }) => {
     const result = await ctx.prisma.$queryRaw(
       Prisma
-        .sql`with json_by_user_savedbook as (select json_object('user', json_object('id', S.id,
-																																'name', S.name,
-																																'image', S.image),
-																						'book', json_object('id', B.id,
-																																'name', B.name,
-																																'authors', B.authors,
-																																'pageCount', B.pageCount,
-																																'thumbnailUrl', B.thumbnailUrl,
-																																'createdAt', B.createdAt
-																								),
-																						'updates', json_group_array(json_object('id', D.id,
-																																										'content', content,
-																																										'progress', progress,
-																																										'createdAt', D.createdAt))) as update_group_obj
+        .sql`
+with json_by_user_savedbook as (select json_object('user', json_object('id', S.id,
+																									'name', S.name,
+																									'image', S.image),
+															'book', json_object('id', B.id,
+																									'name', B.name,
+																									'authors', B.authors,
+																									'pageCount', B.pageCount,
+																									'thumbnailUrl', B.thumbnailUrl,
+																									'createdAt', B.createdAt
+																	),
+															'updates', json_group_array(json_object('id', D.id,
+																																			'content', content,
+																																			'progress', progress,
+																																			'createdAt', D.createdAt))) as update_group_obj
 
-												 from "Update" D
-																	join User S on S.id = D.userId
-																	join SavedBook SB on D.savedBookId = SB.id
-																	join Book B on SB.bookId = B.id
-												 group by D.userid, savedBookId
-												 limit 10)
+					 from "Update" D
+										join User S on S.id = D.userId
+										join SavedBook SB on D.savedBookId = SB.id
+										join Book B on SB.bookId = B.id
+					 group by D.userid, savedBookId
+					 limit 10)
 
 select json_group_array(json(update_group_obj)) as result
 from json_by_user_savedbook;`,
@@ -298,7 +299,47 @@ from json_by_user_savedbook;`,
       return undefined;
     }
 
-    return updatesValidator.parse(JSON.parse(r[0].result));
+    return updateBlocksValidator.parse(JSON.parse(r[0].result));
+  }),
+  getUpdatesByUserId: publicProcedure
+	.input(z.object({userId: z.string()}))
+	.query(async ({ ctx, input }) => {
+    const result = await ctx.prisma.$queryRaw(
+      Prisma
+        .sql`
+with json_by_user_savedbook as (select json_object('user', json_object('id', S.id,
+ 																									'name', S.name,
+ 																									'image', S.image),
+ 															'book', json_object('id', B.id,
+ 																									'name', B.name,
+ 																									'authors', B.authors,
+ 																									'pageCount', B.pageCount,
+ 																									'thumbnailUrl', B.thumbnailUrl,
+ 																									'createdAt', B.createdAt
+ 																	),
+ 															'updates', json_group_array(json_object('id', D.id,
+ 																																			'content', content,
+ 																																			'progress', progress,
+ 																																			'createdAt', D.createdAt))) as update_group_obj
+ 
+ 					 from "Update" D
+ 										join User S on S.id = D.userId
+ 										join SavedBook SB on D.savedBookId = SB.id
+ 										join Book B on SB.bookId = B.id
+ 					 where D.userId = ${input.userId}
+ 					 group by D.userId, savedBookId
+ 					 limit 10)
+
+select json_group_array(json(update_group_obj)) as result
+from json_by_user_savedbook;`,
+    );
+
+    const r = result as { result: string }[];
+    if (r.length === 0 || r[0] === undefined || r[0].result === undefined) {
+      return undefined;
+    }
+
+    return updateBlocksValidator.parse(JSON.parse(r[0].result));
   }),
 });
 
@@ -331,26 +372,30 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
 
 export const updatesValidator = z.array(
   z.object({
+    id: z.string(),
+    createdAt: z.number().transform((a) => new Date(a)),
+    progress: z.number(),
+    content: z.string(),
+  }),
+);
+
+export const updateBookValidator = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  authors: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  pageCount: z.number().optional(),
+  createdAt: z.number().transform((a) => new Date(a)),
+});
+
+export const updateBlocksValidator = z.array(
+  z.object({
     user: z.object({
       id: z.string(),
       name: z.string().optional(),
       image: z.string().optional(),
     }),
-    book: z.object({
-      id: z.string(),
-      name: z.string().optional(),
-      authors: z.string().optional(),
-      thumbnailUrl: z.string().optional(),
-      pageCount: z.number().optional(),
-			createdAt: z.number().transform((a) => new Date(a)),
-    }),
-    updates: z.array(
-      z.object({
-        id: z.string(),
-        createdAt: z.number().transform((a) => new Date(a)),
-        progress: z.number(),
-        content: z.string(),
-      }),
-    ),
+    book: updateBookValidator,
+    updates: updatesValidator,
   }),
 );

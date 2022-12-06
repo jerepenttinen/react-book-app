@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { ErrorMessage } from "@hookform/error-message";
 import { formatBookProgress } from "~/utils/format-book-progress";
+import { Update } from "~/components/UpdateBlock";
 
 function EditProfileModal(props: {
   userData: RouterTypes["users"]["getById"]["output"];
@@ -259,7 +260,7 @@ function FavoriteBooks(props: { userId: string }) {
 function ReadingBooks({ userId }: { userId: string }) {
   const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
     {
-      userId: userId as string,
+      userId: userId,
     },
     {
       retry: 0,
@@ -303,6 +304,36 @@ function ReadingBooks({ userId }: { userId: string }) {
         </section>
       )}
     </>
+  );
+}
+
+function Updates({ userId }: { userId: string }) {
+  const { data, isLoading } = trpc.books.getUpdatesByUserId.useQuery(
+    {
+      userId,
+    },
+    {
+      retry: 0,
+      enabled: !!userId,
+    },
+  );
+  if (isLoading || data?.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="flex flex-col gap-4">
+      <span className="font-bold">Päivitykset</span>
+      <div className="flex flex-col gap-8">
+        {data?.map((block) => (
+          <Update
+            book={block.book}
+            updates={block.updates}
+            key={block.book.id + block.user.id}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -384,7 +415,7 @@ const UserPage: NextPage = () => {
 
       <ReadingBooks userId={userId} />
 
-      {/* <h3>Päivitykset</h3> */}
+      <Updates userId={userId} />
     </div>
   );
 };
