@@ -12,7 +12,9 @@ interface BookCoverProps {
   withoutLink?: boolean;
 }
 
-const sizes = { s: { width: 64, height: 96, tw: "w-16", th: "h-24", }, l: { width: 128, height: 192, tw: "w-32", th: "h-48", },
+const sizes = {
+  s: { width: 64, height: 96, tw: "w-16", th: "h-24" },
+  l: { width: 128, height: 192, tw: "w-32", th: "h-48" },
 };
 
 function isBookType(book: BookData | Book): book is Book {
@@ -47,7 +49,7 @@ interface WrapperProps {
   as: (children?: React.ReactNode) => React.ReactNode;
 }
 
-function Wrapper({ children, condition, as }: WrapperProps) {
+export function ConditionalWrapper({ children, condition, as }: WrapperProps) {
   return <>{condition ? as(children) : children}</>;
 }
 
@@ -63,7 +65,7 @@ function BookCover({ book, size, compact, withoutLink }: BookCoverProps) {
   const common = getCommonBook(book);
 
   return (
-    <Wrapper
+    <ConditionalWrapper
       condition={compact ?? false}
       as={(children) => (
         <div className={`overflow-clip ${s.tw} ${s.th} rounded`}>
@@ -71,30 +73,32 @@ function BookCover({ book, size, compact, withoutLink }: BookCoverProps) {
         </div>
       )}
     >
-      <Wrapper
+      <ConditionalWrapper
         condition={!withoutLink}
         as={(children) => <Link href={`/books/${common.id}`}>{children}</Link>}
       >
-        {common.thumbnail ? (
-          <Image
-            src={common.thumbnail}
-            alt={`Kirjan ${common.title} kansikuva`}
-            width={s.width}
-            height={s.height}
-            className="my-0 h-min rounded"
-            title={common.title ?? ""}
-            priority
-          />
-        ) : (
-          <div
-            className={`flex ${s.tw} ${s.th} items-center justify-center rounded bg-base-content text-base-300`}
-            title={common.title ?? ""}
-          >
-            <ImFileEmpty />
-          </div>
-        )}
-      </Wrapper>
-    </Wrapper>
+        {common.thumbnail
+          ? (
+            <Image
+              src={common.thumbnail}
+              alt={`Kirjan ${common.title} kansikuva`}
+              width={s.width}
+              height={s.height}
+              className="my-0 h-min rounded"
+              title={common.title ?? ""}
+              priority
+            />
+          )
+          : (
+            <div
+              className={`flex ${s.tw} ${s.th} items-center justify-center rounded bg-base-content text-base-300`}
+              title={common.title ?? ""}
+            >
+              <ImFileEmpty />
+            </div>
+          )}
+      </ConditionalWrapper>
+    </ConditionalWrapper>
   );
 }
 

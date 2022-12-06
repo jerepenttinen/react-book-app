@@ -7,7 +7,6 @@ import { formatTitle } from "~/components/SearchResult";
 import { Popover, RadioGroup } from "@headlessui/react";
 import parse from "html-react-parser";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Avatar from "~/components/Avatar";
 import BookCover from "~/components/BookCover";
@@ -48,9 +47,7 @@ function ReviewSection(props: ReviewSectionProps) {
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
         <div className="flex flex-row gap-8" key={review.id} id={review.id}>
-          <Link href={`/users/${review.user?.id}`} className="h-min w-min">
-            <Avatar user={review.user} size="m" />
-          </Link>
+					<Avatar user={review.user} size="m" />
           <div className="flex grow flex-col gap-4">
             <div className="flex flex-row justify-between">
               <UserLink user={review.user} className="font-bold" />

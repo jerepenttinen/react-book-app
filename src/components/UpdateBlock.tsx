@@ -1,14 +1,12 @@
 import { type Book } from "@prisma/client";
 import Link from "next/link";
 import { type z } from "zod";
-import {
-  updateBlocksValidator,
+import type {
   updateBookValidator,
   updatesValidator,
 } from "~/server/trpc/router/books";
 import { formatBookProgress } from "~/utils/format-book-progress";
 import { formatDate } from "~/utils/format-date";
-import Avatar from "./Avatar";
 import BookCover from "./BookCover";
 
 interface UpdateProps {
@@ -53,25 +51,3 @@ export function Update({ book, updates }: UpdateProps) {
   );
 }
 
-interface UpdateBlockProps {
-  updateBlock: z.infer<typeof updateBlocksValidator>[number];
-}
-
-function UpdateBlock({ updateBlock }: UpdateBlockProps) {
-  return (
-    <section
-      key={updateBlock.user.id + updateBlock.book.id}
-      className="flex flex-col gap-4"
-    >
-      <div className="flex flex-row gap-4">
-        <Avatar user={updateBlock.user} size="m" />
-        <div className="flex flex-col gap-4">
-          <span className="font-bold">{updateBlock.user.name}</span>
-					<Update book={updateBlock.book} updates={updateBlock.updates} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default UpdateBlock;

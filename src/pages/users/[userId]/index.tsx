@@ -379,7 +379,7 @@ const UserPage: NextPage = () => {
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-row items-end justify-between">
-        <Avatar user={userData} size="l" />
+        <Avatar user={userData} size="l" noLink noTitle />
         <AddFriendButton userData={userData} />
       </section>
 

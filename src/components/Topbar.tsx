@@ -104,7 +104,7 @@ function Topbar() {
       {session.data ? (
         <Menu as="div" className="dropdown-end dropdown h-12">
           <Menu.Button>
-            <Avatar user={session.data.user} size="s" />
+            <Avatar user={session.data.user} size="s" noLink noTitle />
           </Menu.Button>
           <Menu.Items className="dropdown-content rounded-box flex w-52 flex-col border border-medium bg-base-100 py-4 shadow-xl">
             <Menu.Item>

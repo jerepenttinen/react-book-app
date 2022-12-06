@@ -1,7 +1,5 @@
 import { type NextPage } from "next";
 import { trpc } from "~/utils/trpc";
-import Link from "next/link";
-
 import { Menu, Tab } from "@headlessui/react";
 import Avatar from "~/components/Avatar";
 import { IoEllipsisHorizontal } from "react-icons/io5";
@@ -20,9 +18,7 @@ interface UserInfoProps {
 function UserInfo({user}: UserInfoProps) {
   return (
     <div className="flex items-center gap-4">
-      <Link href={`/users/${user.id}`} className="h-16 w-16">
-        <Avatar user={user} size="m" />
-      </Link>
+			<Avatar user={user} size="m" />
       <UserLink user={user} className="font-bold" />
     </div>
   );

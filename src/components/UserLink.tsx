@@ -2,15 +2,15 @@ import Link from "next/link";
 
 interface UserLinkProps {
   user: {
-    id: string | undefined | null;
-    name: string | undefined | null;
+    id?: string | null;
+    name?: string | null;
   };
   className?: string;
 }
 
 function UserLink({ user, className }: UserLinkProps) {
   return (
-    <Link href={`/users/${user.id}`} className={className} title={user.name}>
+    <Link href={`/users/${user.id}`} className={className} {...!!user.name ? {"title": user.name} : null}>
       {user.name}
     </Link>
   );

@@ -1,12 +1,16 @@
-import { type User } from "@prisma/client";
 import Image from "next/image";
+import Link from "next/link";
+import { ConditionalWrapper } from "./BookCover";
 
 interface AvatarProps {
   user?: {
-		image: string | undefined | null;
-		name: string | undefined | null;
-	};
+    id?: string | null;
+    image?: string | null;
+    name?: string | null;
+  };
   size: "s" | "m" | "l";
+  noLink?: boolean;
+  noTitle?: boolean;
 }
 
 interface Sizes {
@@ -28,26 +32,37 @@ function Avatar(props: AvatarProps) {
   }
 
   return (
-    <div className={`avatar ${!props.user.image && "placeholder"}`}>
-      <div
-        className={`rounded-full ${w} ${h} ${!!props.user.image ? "" : "bg-accent"} text-accent-content ${fontSize}`}
-      >
-        {props.user.image ? (
-          <Image
-            src={props.user.image}
-            alt="Avatar"
-            width={size}
-            height={size}
-            className="my-0 object-contain"
-            priority
-          />
-        ) : (
-          <span className="select-none">
-            {props.user.name?.at(0)?.toUpperCase() ?? "?"}
-          </span>
-        )}
+    <ConditionalWrapper
+      as={(children) => (
+        <Link href={`/users/${props.user?.id}`} className="w-min h-min">{children}</Link>
+      )}
+      condition={!!!props.noLink}
+    >
+      <div className={`avatar ${!props.user.image && "placeholder"}`} {...!!props.user.name && !!!props.noTitle ? {"title": props.user.name} : null}>
+        <div
+          className={`rounded-full ${w} ${h} ${
+            !!props.user.image ? "" : "bg-accent"
+          } text-accent-content ${fontSize}`}
+        >
+          {props.user.image
+            ? (
+              <Image
+                src={props.user.image}
+                alt="Avatar"
+                width={size}
+                height={size}
+                className="my-0 object-contain"
+                priority
+              />
+            )
+            : (
+              <span className="select-none">
+                {props.user.name?.at(0)?.toUpperCase() ?? "?"}
+              </span>
+            )}
+        </div>
       </div>
-    </div>
+    </ConditionalWrapper>
   );
 }
 
