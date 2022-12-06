@@ -283,17 +283,17 @@ function ReadingBooks({ userId }: { userId: string }) {
                     size="s"
                     key={savedBook.id + "sidecover"}
                   />
-                  <div className="flex w-3/5 flex-col gap-1 p-0">
+                  <div className="flex flex-col gap-1 p-0">
                     <Link
                       href={`/books/${savedBook.bookId}`}
                       className="font-bold"
                     >
                       {savedBook.book.name}
                     </Link>
-                    <span>
+                    <span className="text-sm">
                       {savedBook.book.authors ?? "Tuntematon kirjoittaja"}
                     </span>
-                    <span>
+                    <span className="text-sm">
                       {formatBookProgress(update, savedBook.book.pageCount)}
                     </span>
                   </div>

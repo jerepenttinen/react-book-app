@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ErrorMessage } from "@hookform/error-message";
 import { createReviewValidator } from "~/server/common/books-validators";
 import { type z } from "zod";
+import UserLink from "~/components/UserLink";
 
 interface ReviewSectionProps {
   bookId: string;
@@ -52,7 +53,7 @@ function ReviewSection(props: ReviewSectionProps) {
           </Link>
           <div className="flex grow flex-col gap-4">
             <div className="flex flex-row justify-between">
-              <span className="font-bold">{review.user.name}</span>
+              <UserLink user={review.user} className="font-bold" />
               <span>{formatDate(review.createdAt)}</span>
             </div>
             <Stars score={review.score} medium />

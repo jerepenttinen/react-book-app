@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
-import Link from "next/link";
 import Avatar from "~/components/Avatar";
 import { Update } from "~/components/UpdateBlock";
+import UserLink from "~/components/UserLink";
 import { trpc } from "~/utils/trpc";
 
 const Home: NextPage = () => {
@@ -20,7 +20,7 @@ const Home: NextPage = () => {
 					<div className="flex flex-row gap-4">
 						<Avatar user={block.user} size="m" />
 						<div className="flex flex-col gap-4">
-							<Link href={`/users/${block.user.id}`} className="font-bold">{block.user.name}</Link>
+							<UserLink user={block.user} className="font-bold" />
 							<Update book={block.book} updates={block.updates} />
 						</div>
 					</div>

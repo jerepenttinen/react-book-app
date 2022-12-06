@@ -7,17 +7,23 @@ import Avatar from "~/components/Avatar";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { Fragment } from "react";
 import { useSession } from "next-auth/react";
-import { type User } from "@prisma/client";
+import UserLink from "~/components/UserLink";
 
-function UserInfo({ user }: { user: Partial<User> }) {
+interface UserInfoProps {
+	user: {
+		id: string | undefined | null;
+		name: string | undefined | null;
+		image: string | undefined | null;
+	}
+}
+
+function UserInfo({user}: UserInfoProps) {
   return (
     <div className="flex items-center gap-4">
       <Link href={`/users/${user.id}`} className="h-16 w-16">
         <Avatar user={user} size="m" />
       </Link>
-      <Link href={`/users/${user.id}`} className="font-bold no-underline">
-        {user.name}
-      </Link>
+      <UserLink user={user} className="font-bold" />
     </div>
   );
 }
@@ -48,7 +54,7 @@ function FriendsPanel() {
           className="flex items-center justify-between"
         >
           <UserInfo user={friend} />
-          <Menu as="div" className="dropdown-end dropdown h-6">
+          <Menu as="div" className="dropdown dropdown-end h-6">
             <Menu.Button>
               <IoEllipsisHorizontal size={24} />
             </Menu.Button>
@@ -56,11 +62,9 @@ function FriendsPanel() {
               <Menu.Item>
                 {({ active }) => (
                   <div
-                    className={
-                      active
-                        ? "btn-primary no-animation btn rounded-none"
-                        : "no-animation btn rounded-none"
-                    }
+                    className={active
+                      ? "btn-primary no-animation btn rounded-none"
+                      : "no-animation btn rounded-none"}
                   >
                     Tökkää
                   </div>
@@ -69,11 +73,9 @@ function FriendsPanel() {
               <Menu.Item>
                 {({ active }) => (
                   <div
-                    className={
-                      active
-                        ? "btn-primary no-animation btn rounded-none"
-                        : "no-animation btn rounded-none"
-                    }
+                    className={active
+                      ? "btn-primary no-animation btn rounded-none"
+                      : "no-animation btn rounded-none"}
                   >
                     Poista kaveri
                   </div>
@@ -135,9 +137,9 @@ const FriendsPage: NextPage = () => {
         <Tab as={Fragment}>
           {({ selected }) => (
             <a
-              className={
-                selected ? "tab tab-bordered tab-active" : "tab tab-bordered"
-              }
+              className={selected
+                ? "tab tab-bordered tab-active"
+                : "tab tab-bordered"}
             >
               Kaverit
             </a>
@@ -146,9 +148,9 @@ const FriendsPage: NextPage = () => {
         <Tab as={Fragment}>
           {({ selected }) => (
             <a
-              className={
-                selected ? "tab tab-bordered tab-active" : "tab tab-bordered"
-              }
+              className={selected
+                ? "tab tab-bordered tab-active"
+                : "tab tab-bordered"}
             >
               Kaveripyynnöt
             </a>
@@ -157,9 +159,9 @@ const FriendsPage: NextPage = () => {
         <Tab as={Fragment}>
           {({ selected }) => (
             <a
-              className={
-                selected ? "tab tab-bordered tab-active" : "tab tab-bordered"
-              }
+              className={selected
+                ? "tab tab-bordered tab-active"
+                : "tab tab-bordered"}
             >
               Haku
             </a>

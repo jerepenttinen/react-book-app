@@ -2,7 +2,10 @@ import { type User } from "@prisma/client";
 import Image from "next/image";
 
 interface AvatarProps {
-  user?: Partial<User>;
+  user?: {
+		image: string | undefined | null;
+		name: string | undefined | null;
+	};
   size: "s" | "m" | "l";
 }
 
