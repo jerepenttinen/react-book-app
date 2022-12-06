@@ -22,7 +22,6 @@
     "@trpc/next": "10.0.0-rc.0",
     "@trpc/react-query": "10.0.0-rc.0",
     "@trpc/server": "10.0.0-rc.0",
-    "@types/react-icons": "^3.0.0",
     "daisyui": "^2.38.0",
     "dayjs": "^1.11.6",
     "got": "^12.5.2",

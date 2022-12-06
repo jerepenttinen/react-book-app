@@ -264,7 +264,7 @@ function UpdateProgressModal({
 							)
 							: null}
 					</div>
-					<input type="button" className="btn-ghost btn" value="Olen valmis" />
+					<input type="button" className="btn-ghost btn" value="Olen valmis" onClick={() => alert("todo...")} />
 				</div>
 				<textarea
 					className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"

@@ -298,7 +298,7 @@ from json_by_user_savedbook;`,
       return undefined;
     }
 
-    return homepageValidator.parse(JSON.parse(r[0].result));
+    return updatesValidator.parse(JSON.parse(r[0].result));
   }),
 });
 
@@ -329,7 +329,7 @@ async function loadBookToDatabase(ctx: Context, bookId: string) {
   return book;
 }
 
-const homepageValidator = z.array(
+export const updatesValidator = z.array(
   z.object({
     user: z.object({
       id: z.string(),
