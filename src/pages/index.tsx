@@ -5,7 +5,7 @@ import UserLink from "~/components/UserLink";
 import { trpc } from "~/utils/trpc";
 
 const Home: NextPage = () => {
-  const { data, isLoading } = trpc.books.getHomePageUpdates.useQuery();
+  const { data, isLoading } = trpc.updates.getHomePageUpdates.useQuery();
   if (isLoading) {
     return null;
   }

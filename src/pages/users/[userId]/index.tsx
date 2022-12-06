@@ -258,7 +258,7 @@ function FavoriteBooks(props: { userId: string }) {
 }
 
 function ReadingBooks({ userId }: { userId: string }) {
-  const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
+  const { data: readingBooksData } = trpc.updates.getReadingBooks.useQuery(
     {
       userId: userId,
     },
@@ -308,7 +308,7 @@ function ReadingBooks({ userId }: { userId: string }) {
 }
 
 function Updates({ userId }: { userId: string }) {
-  const { data, isLoading } = trpc.books.getUpdatesByUserId.useQuery(
+  const { data, isLoading } = trpc.updates.getUpdatesByUserId.useQuery(
     {
       userId,
     },

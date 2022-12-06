@@ -76,7 +76,7 @@ function NotificationsLink() {
 
 function Sidebar() {
 	const session = useSession();
-	const { data: readingBooksData } = trpc.books.getReadingBooks.useQuery(
+	const { data: readingBooksData } = trpc.updates.getReadingBooks.useQuery(
 		undefined,
 		{
 			retry: 0,
@@ -85,7 +85,7 @@ function Sidebar() {
 	);
 
 	const [book, setBook, modalIsOpen, closeModal] = useDialog<
-		RouterTypes["books"]["getReadingBooks"]["output"][number]
+		RouterTypes["updates"]["getReadingBooks"]["output"][number]
 	>();
 
 	return (
@@ -165,7 +165,7 @@ function Sidebar() {
 													: null}
 												<button
 													type="button"
-													className="btn-xs btn bordered w-min border-medium px-8 hover:border-medium/50"
+													className="btn-xs btn btn-ghost w-min border-medium px-8 hover:border-medium/50 focus:outline-medium bg-base-100"
 													onClick={() => setBook(savedBook)}
 												>
 													Päivitä
@@ -197,12 +197,12 @@ function UpdateProgressModal({
 	open,
 	close,
 }: {
-	book: RouterTypes["books"]["getReadingBooks"]["output"][number];
+	book: RouterTypes["updates"]["getReadingBooks"]["output"][number];
 	open: boolean;
 	close: () => void;
 }) {
 	const trpcContext = trpc.useContext();
-	const { data: lastUpdateData, isLoading: updateIsLoading } = trpc.books
+	const { data: lastUpdateData, isLoading: updateIsLoading } = trpc.updates
 		.getMyLastProgressUpdateForBook.useQuery(
 			{
 				savedBookId: book.id,
@@ -213,7 +213,7 @@ function UpdateProgressModal({
 		);
 
 	// Lisää olen valmis mutaatio
-	const createProgressUpdateMutation = trpc.books.createProgressUpdate
+	const createProgressUpdateMutation = trpc.updates.createProgressUpdate
 		.useMutation();
 
 	const { register, handleSubmit, setFocus, setValue } = useForm<
@@ -239,7 +239,7 @@ function UpdateProgressModal({
 				as="form"
 				onSubmit={handleSubmit(async (data) => {
 					await createProgressUpdateMutation.mutateAsync(data);
-					trpcContext.books.getReadingBooks.invalidate();
+					trpcContext.updates.invalidate();
 					close();
 				})}
 				className="modal-box flex flex-col gap-4 border border-base-content border-opacity-20"
@@ -264,7 +264,7 @@ function UpdateProgressModal({
 							)
 							: null}
 					</div>
-					<input type="button" className="btn-ghost btn" value="Olen valmis" onClick={() => alert("todo...")} />
+					<input type="button" className="btn-ghost btn focus:outline-medium" value="Olen valmis" onClick={() => alert("todo...")} />
 				</div>
 				<textarea
 					className="textarea-bordered textarea border-medium text-lg text-base-content placeholder:text-medium"
@@ -276,13 +276,13 @@ function UpdateProgressModal({
 				<div className="flex flex-row justify-end gap-4">
 					<input
 						type="button"
-						className="btn-ghost btn"
+						className="btn-ghost btn focus:outline-medium"
 						value="Peruuta"
 						onClick={close}
 					/>
 					<input
 						type="submit"
-						className="btn bordered w-min border-medium px-8 hover:border-medium/50"
+						className="btn btn-ghost border w-min border-medium px-8 hover:border-medium/50 focus:outline-medium"
 						value="Päivitä"
 					/>
 				</div>

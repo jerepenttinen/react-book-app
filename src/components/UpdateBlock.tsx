@@ -4,7 +4,7 @@ import { type z } from "zod";
 import type {
   updateBookValidator,
   updatesValidator,
-} from "~/server/trpc/router/books";
+} from "~/server/trpc/router/updates";
 import { formatBookProgress } from "~/utils/format-book-progress";
 import { formatDate } from "~/utils/format-date";
 import BookCover from "./BookCover";

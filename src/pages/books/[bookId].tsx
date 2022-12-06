@@ -281,7 +281,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
                         onSuccess: () => {
                           // TODO: Oma reititin savedbookeille?
                           trpcContext.books.getSavedBookById.invalidate();
-                          trpcContext.books.getReadingBooks.invalidate();
+                          trpcContext.updates.getReadingBooks.invalidate();
                         },
                       },
                     );
