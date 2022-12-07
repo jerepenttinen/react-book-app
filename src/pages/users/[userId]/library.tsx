@@ -7,7 +7,7 @@ import {
   flexRender,
   useReactTable,
 } from "@tanstack/react-table";
-import { type RouterTypes, trpc } from "~/utils/trpc";
+import { type RouterOutputs, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import { IoCaretDown, IoCaretUp, IoCloseOutline } from "react-icons/io5";
 import { useEffect, useMemo, useState } from "react";
@@ -20,7 +20,7 @@ import { Stars } from "~/components/Stars";
 import { formatDate } from "~/utils/format-date";
 import { DynamicTextWrapper } from "~/components/DynamicTextWrapper";
 
-type RowType = RouterTypes["books"]["getSavedBooks"]["output"][number];
+type RowType = RouterOutputs["books"]["getSavedBooks"][number];
 const columnHelper = createColumnHelper<RowType>();
 
 const shelves = new Map<string, string>([
@@ -230,10 +230,8 @@ const LibraryPage: NextPage = () => {
                   },
                   {
                     onSuccess: () => {
-                      trpcContext.books.getSavedBooks.setData(
-                        data?.filter((b) => b.bookId !== book?.id),
-                      );
-                      trpcContext.books.getReadingBooks.invalidate();
+                      trpcContext.books.getSavedBooks.invalidate();
+                      trpcContext.updates.getReadingBooks.invalidate();
                     },
                   },
                 );

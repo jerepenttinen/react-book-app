@@ -1,7 +1,7 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import Avatar from "~/components/Avatar";
-import { type RouterTypes, trpc } from "~/utils/trpc";
+import { type RouterOutputs, trpc } from "~/utils/trpc";
 import BookCover from "~/components/BookCover";
 import Link from "next/link";
 import { IoCalendarOutline, IoLocationOutline } from "react-icons/io5";
@@ -19,7 +19,7 @@ import { formatBookProgress } from "~/utils/format-book-progress";
 import { Update } from "~/components/UpdateBlock";
 
 function EditProfileModal(props: {
-  userData: RouterTypes["users"]["getById"]["output"];
+  userData: RouterOutputs["users"]["getById"];
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
@@ -102,7 +102,7 @@ function EditProfileModal(props: {
 }
 
 function AddFriendButton(props: {
-  userData: RouterTypes["users"]["getById"]["output"];
+  userData: RouterOutputs["users"]["getById"];
 }) {
   const session = useSession();
   const addFriendMutation = trpc.users.sendFriendRequest.useMutation();

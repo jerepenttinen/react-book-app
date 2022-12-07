@@ -18,7 +18,7 @@ import { type z } from "zod";
 import { useDialog } from "~/pages/users/[userId]/library";
 import { createProgressUpdateValidator } from "~/server/common/books-validators";
 import { formatBookProgress } from "~/utils/format-book-progress";
-import { type RouterTypes, trpc } from "~/utils/trpc";
+import { type RouterOutputs, trpc } from "~/utils/trpc";
 import BookCover from "./BookCover";
 import { Divider } from "./Divider";
 import { Searchbar } from "./Topbar";
@@ -85,7 +85,7 @@ function Sidebar() {
 	);
 
 	const [book, setBook, modalIsOpen, closeModal] = useDialog<
-		RouterTypes["updates"]["getReadingBooks"]["output"][number]
+		RouterOutputs["updates"]["getReadingBooks"][number]
 	>();
 
 	return (
@@ -197,7 +197,7 @@ function UpdateProgressModal({
 	open,
 	close,
 }: {
-	book: RouterTypes["updates"]["getReadingBooks"]["output"][number];
+	book: RouterOutputs["updates"]["getReadingBooks"][number];
 	open: boolean;
 	close: () => void;
 }) {

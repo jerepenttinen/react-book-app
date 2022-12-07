@@ -1,11 +1,11 @@
 import { type NextPage } from "next";
 import Avatar from "~/components/Avatar";
-import { type RouterTypes, trpc } from "~/utils/trpc";
+import { type RouterOutputs, trpc } from "~/utils/trpc";
 
 function FriendRequestNotification({
   notification,
 }: {
-  notification: RouterTypes["users"]["getMyNotifications"]["output"][number];
+  notification: RouterOutputs["users"]["getMyNotifications"][number];
 }) {
   const handleFriendRequest = trpc.users.handleFriendRequest.useMutation();
   const trpcContext = trpc.useContext();
