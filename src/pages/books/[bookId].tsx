@@ -197,7 +197,7 @@ const shelves = [
   },
 ];
 
-function AddToLibraryButton(props: ReviewSectionProps) {
+export function AddToLibraryButton(props: ReviewSectionProps) {
   const session = useSession();
   const trpcContext = trpc.useContext();
   const { data: savedBookData } = trpc.books.getSavedBookById.useQuery(
@@ -301,7 +301,7 @@ function AddToLibraryButton(props: ReviewSectionProps) {
   );
 }
 
-function BookScore({ bookId }: { bookId: string }) {
+export function BookScore({ bookId }: { bookId: string }) {
   const { data: starData } = trpc.books.getBookAverageScoreById.useQuery(
     {
       id: bookId,
