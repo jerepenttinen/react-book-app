@@ -42,6 +42,32 @@ export const usersRouter = router({
       },
     });
   }),
+  deleteMyFriend: protectedProcedure
+    .input(z.object({ friendId: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.$transaction([
+        ctx.prisma.user.update({
+          where: {
+            id: ctx.session.user.id,
+          },
+          data: {
+            friends: {
+              disconnect: [{ id: input.friendId }],
+            },
+          },
+        }),
+        ctx.prisma.user.update({
+          where: {
+            id: input.friendId,
+          },
+          data: {
+            friends: {
+              disconnect: [{ id: ctx.session.user.id }],
+            },
+          },
+        }),
+      ]);
+    }),
   getMyNotifications: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.notification.findMany({
       where: {
