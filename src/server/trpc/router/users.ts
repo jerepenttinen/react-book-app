@@ -12,7 +12,7 @@ const minimalUserSelect = {
   image: true,
 };
 
-const notificationTypes = z.enum(["friend"]);
+const notificationTypes = z.enum(["friend", "recommendation"]);
 
 export const usersRouter = router({
   getById: publicProcedure
@@ -42,6 +42,32 @@ export const usersRouter = router({
       },
     });
   }),
+  deleteMyFriend: protectedProcedure
+    .input(z.object({ friendId: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.$transaction([
+        ctx.prisma.user.update({
+          where: {
+            id: ctx.session.user.id,
+          },
+          data: {
+            friends: {
+              disconnect: [{ id: input.friendId }],
+            },
+          },
+        }),
+        ctx.prisma.user.update({
+          where: {
+            id: input.friendId,
+          },
+          data: {
+            friends: {
+              disconnect: [{ id: ctx.session.user.id }],
+            },
+          },
+        }),
+      ]);
+    }),
   getMyNotifications: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.notification.findMany({
       where: {
@@ -132,6 +158,62 @@ export const usersRouter = router({
         },
       });
     }),
+  sendBookRecommendation: protectedProcedure
+    .input(z.object({ targetUserId: z.string(), bookId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.id === input.targetUserId) {
+        throw new TRPCError({
+          message: "You can't send book recommendation to yourself",
+          code: "FORBIDDEN",
+        });
+      }
+
+      await ctx.prisma.user.findUniqueOrThrow({
+        where: {
+          id: input.targetUserId,
+        },
+      });
+
+      const areFriends = await ctx.prisma.user.count({
+        where: {
+          id: ctx.session.user.id,
+          friends: {
+            some: {
+              id: input.targetUserId,
+            },
+          },
+        },
+      });
+
+      if (areFriends === 0) {
+        throw new TRPCError({ message: "Not friends", code: "CONFLICT" });
+      }
+
+      const existingNotification = await ctx.prisma.notification.findMany({
+        where: {
+          fromUserId: ctx.session.user.id,
+          toUserId: input.targetUserId,
+          bookId: input.bookId,
+          type: "recommendation",
+        },
+      });
+
+      if (existingNotification.length > 0) {
+        throw new TRPCError({
+          message: "Book recommendation already sent to this friend",
+          code: "CONFLICT",
+        });
+      }
+
+      return await ctx.prisma.notification.create({
+        data: {
+          fromUserId: ctx.session.user.id,
+          toUserId: input.targetUserId,
+          bookId: input.bookId,
+          type: "recommendation",
+        },
+      });
+    }),
   handleFriendRequest: protectedProcedure
     .input(z.object({ notificationId: z.string(), accept: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
@@ -152,6 +234,26 @@ export const usersRouter = router({
       }
 
       return acceptFriendRequest(ctx, notification);
+    }),
+  handleRecommendation: protectedProcedure
+    .input(z.object({ notificationId: z.string(), accept: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const notification = await ctx.prisma.notification.findFirstOrThrow({
+        where: {
+          id: input.notificationId,
+          toUserId: ctx.session.user.id,
+          type: "recommendation",
+        },
+      });
+
+      if (!input.accept) {
+        return ctx.prisma.notification.delete({
+          where: {
+            id: notification.id,
+          },
+        });
+      }
+      return;
     }),
   getFriendshipStatus: protectedProcedure
     .input(z.object({ userId: z.string() }))

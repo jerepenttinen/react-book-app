@@ -123,6 +123,7 @@ model Notification {
   id         String   @id @default(cuid())
   type       String
   toUserId   String
+  bookId     String?
   toUser     User     @relation("notifications", fields: [toUserId], references: [id])
   fromUserId String?
   fromUser   User?    @relation("sentNotifications", fields: [fromUserId], references: [id])
