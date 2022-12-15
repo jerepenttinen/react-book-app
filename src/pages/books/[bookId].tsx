@@ -47,7 +47,7 @@ function ReviewSection(props: ReviewSectionProps) {
       <span className="font-bold">Kirjan arvostelut</span>
       {reviewData?.map((review) => (
         <div className="flex flex-row gap-8" key={review.id} id={review.id}>
-					<Avatar user={review.user} size="m" />
+          <Avatar user={review.user} size="m" />
           <div className="flex grow flex-col gap-4">
             <div className="flex flex-row justify-between">
               <UserLink user={review.user} className="font-bold" />
@@ -84,7 +84,7 @@ function CreateReview(props: CreateReviewProps) {
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-			suspense: true,
+      suspense: true,
     },
   );
 
@@ -99,8 +99,8 @@ function CreateReview(props: CreateReviewProps) {
   });
 
   useEffect(() => {
-		setValue("score", myReview?.score ?? 0);
-		setValue("content", myReview?.content ?? "");
+    setValue("score", myReview?.score ?? 0);
+    setValue("content", myReview?.content ?? "");
   }, [setValue, myReview, props.bookId]);
 
   if (!session.data || isLoading) {
@@ -301,7 +301,15 @@ export function AddToLibraryButton(props: ReviewSectionProps) {
   );
 }
 
-export function BookScore({ bookId }: { bookId: string }) {
+export function BookScore({
+  bookId,
+  large,
+  medium,
+}: {
+  bookId: string;
+  large?: boolean;
+  medium?: boolean;
+}) {
   const { data: starData } = trpc.books.getBookAverageScoreById.useQuery(
     {
       id: bookId,
@@ -312,12 +320,13 @@ export function BookScore({ bookId }: { bookId: string }) {
     },
   );
   const score = starData?._avg.score ? starData._avg.score / 2 : 0;
+  const fontSize = large ? "text-4xl" : medium ? "text-lg" : "text-sm";
 
   return (
     <div className="my-0 inline-flex items-center gap-2">
-      <Stars score={starData?._avg.score ?? 0} large />
+      <Stars score={starData?._avg.score ?? 0} large={large} medium={medium} />
       <span
-        className="text-4xl font-extrabold"
+        className={"font-extrabold " + fontSize}
         title={`${starData?._count.score ?? 0} arvostelua`}
       >
         {score.toFixed(2)}
@@ -376,7 +385,7 @@ function BookInfo({ bookId }: BookInfoProps) {
     {
       enabled: !!bookId,
       retry: 0,
-			suspense: true,
+      suspense: true,
     },
   );
 
@@ -417,7 +426,7 @@ function BookInfo({ bookId }: BookInfoProps) {
         <span>{volume.authors?.join(", ") ?? "Tuntematon kirjoittaja"}</span>
 
         <div className="inline-flex gap-2">
-          <BookScore bookId={bookId} />
+          <BookScore bookId={bookId} large />
         </div>
         {volume.description && (
           <div className="flex flex-shrink flex-col">
@@ -467,18 +476,18 @@ const BookPage: NextPage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-			<Suspense key={bookId} fallback={<p>Ladataan...</p>}>
-				<BookInfo bookId={bookId} />
-				{session.data ? (
-					<Suspense>
-						<Divider />
-						<span className="font-bold">Kerro muille mitä pidit kirjasta</span>
-						<CreateReview bookId={bookId} />
-					</Suspense>
-				) : null}
-				<Divider />
-				<ReviewSection bookId={bookId} />
-			</Suspense>
+      <Suspense key={bookId} fallback={<p>Ladataan...</p>}>
+        <BookInfo bookId={bookId} />
+        {session.data ? (
+          <Suspense>
+            <Divider />
+            <span className="font-bold">Kerro muille mitä pidit kirjasta</span>
+            <CreateReview bookId={bookId} />
+          </Suspense>
+        ) : null}
+        <Divider />
+        <ReviewSection bookId={bookId} />
+      </Suspense>
     </div>
   );
 };
